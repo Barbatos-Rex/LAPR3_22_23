@@ -65,6 +65,7 @@
                     <param>barbatos_rex1.*</param>
                 </targetTests>
                 <timestampedReports>false</timestampedReports>
+                <siteReportDirectory>report</siteReportDirectory>
             </configuration>
         </plugin>
         <!-- JAVA CODE COVERAGE MAVEN PLUGIN: jacoco:report (integrated on test goal) -->
