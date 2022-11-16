@@ -56,6 +56,14 @@ node{
 
     parallel(publishPar)
 
+    stage("Packaging"){
+        if(isUnix()){
+            sh 'mvn package'
+        }else{
+            bat 'mvn package'
+        }
+    }
+
     stage("Archiving Phase"){
          archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
 

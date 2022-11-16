@@ -11,7 +11,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
+            <version>5.9.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -31,42 +31,42 @@
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>3.4.1</version>
         </plugin>
-        <!-- PITEST MAVEN PLUGIN: pitest:report -->
-        <plugin>
-            <groupId>org.pitest</groupId>
-            <artifactId>pitest-maven</artifactId>
-            <version>1.4.3</version>
+<!--        &lt;!&ndash; PITEST MAVEN PLUGIN: pitest:report &ndash;&gt;-->
+<!--        <plugin>-->
+<!--            <groupId>org.pitest</groupId>-->
+<!--            <artifactId>pitest-maven</artifactId>-->
+<!--            <version>1.4.3</version>-->
 
-            <executions>
-                <execution>
-                    <id>pit-report</id>
-                    <!-- optional, this example attached the goal into mvn test phase -->
-                    <phase>test</phase>
-                    <goals>
-                        <goal>mutationCoverage</goal>
-                    </goals>
-                </execution>
-            </executions>
+<!--            <executions>-->
+<!--                <execution>-->
+<!--                    <id>pit-report</id>-->
+<!--                    &lt;!&ndash; optional, this example attached the goal into mvn test phase &ndash;&gt;-->
+<!--                    <phase>test</phase>-->
+<!--                    <goals>-->
+<!--                        <goal>mutationCoverage</goal>-->
+<!--                    </goals>-->
+<!--                </execution>-->
+<!--            </executions>-->
 
-            <!-- https://github.com/hcoles/pitest/issues/284 -->
-            <!-- Need this to support JUnit 5 -->
-            <dependencies>
-                <dependency>
-                    <groupId>org.pitest</groupId>
-                    <artifactId>pitest-junit5-plugin</artifactId>
-                    <version>0.15</version>
-                </dependency>
-            </dependencies>
-            <configuration>
-                <targetClasses>
-                    <param>barbatos_rex1.*</param>
-                </targetClasses>
-                <targetTests>
-                    <param>barbatos_rex1.*</param>
-                </targetTests>
-                <timestampedReports>false</timestampedReports>
-            </configuration>
-        </plugin>
+<!--            &lt;!&ndash; https://github.com/hcoles/pitest/issues/284 &ndash;&gt;-->
+<!--            &lt;!&ndash; Need this to support JUnit 5 &ndash;&gt;-->
+<!--            <dependencies>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.pitest</groupId>-->
+<!--                    <artifactId>pitest-junit5-plugin</artifactId>-->
+<!--                    <version>0.15</version>-->
+<!--                </dependency>-->
+<!--            </dependencies>-->
+<!--            <configuration>-->
+<!--                <targetClasses>-->
+<!--                    <param>barbatos_rex1.*</param>-->
+<!--                </targetClasses>-->
+<!--                <targetTests>-->
+<!--                    <param>barbatos_rex1.*</param>-->
+<!--                </targetTests>-->
+<!--                <siteReportDirectory>report</siteReportDirectory>-->
+<!--            </configuration>-->
+<!--        </plugin>-->
         <!-- JAVA CODE COVERAGE MAVEN PLUGIN: jacoco:report (integrated on test goal) -->
         <plugin>
             <groupId>org.jacoco</groupId>
