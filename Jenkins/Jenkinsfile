@@ -61,7 +61,7 @@ node{
         if(isUnix()){
             sh 'mvn clean test'
         }else{
-            bat 'bat clean test'
+            bat 'mvn clean test'
         }
     }
 
