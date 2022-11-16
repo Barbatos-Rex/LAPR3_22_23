@@ -16,7 +16,7 @@ node{
     publishPar.pit = {
         stage("Pit Mutation Phase"){
             if(isUnix()){
-                sh 'mvn pitest:report'
+                sh 'mvn -DtimestampedReports=false pitest:report'
             }
             else{
                 bat 'mvn pitest:report'
@@ -66,6 +66,14 @@ node{
     }
 
     parallel(publishPar)
+
+    stage("Packaging"){
+        if(isUnix()){
+            sh 'mvn package'
+        }else{
+            bat 'mvn package'
+        }
+    }
 
     stage("Archiving Phase"){
          archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
