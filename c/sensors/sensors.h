@@ -109,3 +109,11 @@ unsigned char sens_humd_solo(unsigned char ult_hmd_solo, unsigned char ult_pluvi
  * @return A nova medição do valor de pluviosidade (mm)
  */
 unsigned char sens_pluvio(unsigned char ult_pluvio, char ult_temp, char comp_rand);
+
+// UNITS for each sensor
+const char* TEMP_UNIT;
+const char* WIND_VELOCITY_UNIT;
+const char* WIND_DIRECTION_UNIT;
+const char* HUMIDITY_ATMOSPHERIC_UNIT;
+const char* HUMIDITY_SOIL_UNIT;
+const char* RAIN_UNIT;

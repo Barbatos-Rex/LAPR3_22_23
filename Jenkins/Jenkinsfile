@@ -1,0 +1,80 @@
+node{
+    checkout scm
+
+    publishPar=[:]
+    publishPar.jacoco = {
+        stage("Java Code Coverage Phase"){
+            if(isUnix()){
+                sh 'mvn jacoco:report'
+            }
+            else{
+                bat 'mvn jacoco:report'
+            }
+        }
+    }
+
+    publishPar.pit = {
+        stage("Pit Mutation Phase"){
+            if(isUnix()){
+                sh 'mvn pitest:report'
+            }
+            else{
+                bat 'mvn pitest:report'
+            }
+        }
+    }
+
+    publishPar.javadoc = {
+        stage("Javadoc Phase"){
+            if(isUnix()){
+                sh 'mvn javadoc:javadoc'
+            }
+            else{
+                bat 'mvn javadoc:javadoc'
+            }
+        }
+    }
+
+    publishPar.test={
+        stage("Test Report Phase"){
+             if(isUnix()){
+                sh 'mvn pitest:report'
+             }
+             else{
+                bat 'mvn pitest:report'
+             }
+        }
+    }
+
+
+
+
+
+    publishPar.failFast=true
+
+
+
+
+
+    stage("Build and Test Phase"){
+        failFast : true
+        if(isUnix()){
+            sh 'mvn clean test'
+        }else{
+            bat 'bat clean test'
+        }
+    }
+
+    parallel(publishPar)
+
+    stage("Archiving Phase"){
+         publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/pit-reports', reportFiles: 'index.html', reportName: 'Mutation Tests Report', reportTitles: '', useWrapperFileDirectly: true])
+         publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site/jacoco', reportFiles: 'index.html', reportName: 'Java Code Coverage Report', reportTitles: '', useWrapperFileDirectly: true])
+         publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site/apidocs', reportFiles: 'index.html', reportName: 'Javadoc', reportTitles: '', useWrapperFileDirectly: true])
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site', reportFiles: 'surefire-report.html', reportName: 'Surefire Tests Report', reportTitles: '', useWrapperFileDirectly: true])
+    }
+
+
+
+
+}
