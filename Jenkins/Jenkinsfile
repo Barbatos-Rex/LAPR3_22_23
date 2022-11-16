@@ -13,17 +13,6 @@ node{
         }
     }
 
-    publishPar.pit = {
-        stage("Pit Mutation Phase"){
-            if(isUnix()){
-                sh 'mvn -DtimestampedReports=false pitest:report'
-            }
-            else{
-                bat 'mvn pitest:report'
-            }
-        }
-    }
-
     publishPar.javadoc = {
         stage("Javadoc Phase"){
             if(isUnix()){
