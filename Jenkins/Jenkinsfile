@@ -13,17 +13,6 @@ node{
         }
     }
 
-    publishPar.pit = {
-        stage("Pit Mutation Phase"){
-            if(isUnix()){
-                sh 'mvn pitest:report'
-            }
-            else{
-                bat 'mvn pitest:report'
-            }
-        }
-    }
-
     publishPar.javadoc = {
         stage("Javadoc Phase"){
             if(isUnix()){
@@ -69,7 +58,7 @@ node{
 
     stage("Archiving Phase"){
          archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
-         publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/pit-reports', reportFiles: 'index.html', reportName: 'Mutation Tests Report', reportTitles: '', useWrapperFileDirectly: true])
+
          publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site/jacoco', reportFiles: 'index.html', reportName: 'Java Code Coverage Report', reportTitles: '', useWrapperFileDirectly: true])
          publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site/apidocs', reportFiles: 'index.html', reportName: 'Javadoc', reportTitles: '', useWrapperFileDirectly: true])
          publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site', reportFiles: 'surefire-report.html', reportName: 'Surefire Tests Report', reportTitles: '', useWrapperFileDirectly: true])
