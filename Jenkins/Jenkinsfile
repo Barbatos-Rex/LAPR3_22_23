@@ -67,6 +67,14 @@ node{
 
     parallel(publishPar)
 
+    stage("Packaging"){
+        if(isUnix()){
+            sh 'mvn package'
+        }else{
+            bat 'mvn package'
+        }
+    }
+
     stage("Archiving Phase"){
          archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
          publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/pit-reports/[0-9]+', reportFiles: 'index.html', reportName: 'Mutation Tests Report', reportTitles: '', useWrapperFileDirectly: true])
