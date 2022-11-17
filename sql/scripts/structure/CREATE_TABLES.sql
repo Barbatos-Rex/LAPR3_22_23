@@ -141,6 +141,7 @@ CREATE TABLE MeteorologicData
 CREATE TABLE MeteorologicStation
 (
     id number(10) GENERATED AS IDENTITY,
+    name VARCHAR2(255),
     PRIMARY KEY (id)
 );
 CREATE TABLE Product
