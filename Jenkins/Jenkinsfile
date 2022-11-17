@@ -27,10 +27,10 @@ node{
     publishPar.test={
         stage("Test Report Phase"){
              if(isUnix()){
-                sh 'mvn pitest:report'
+                sh 'mvn surefire-report:report'
              }
              else{
-                bat 'mvn pitest:report'
+                bat 'mvn surefire-report:report'
              }
         }
     }
