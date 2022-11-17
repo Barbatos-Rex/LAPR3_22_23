@@ -40,3 +40,59 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('New System User ID: ' || userId);
     return userId;
 end;
+
+
+CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type) RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result for SELECT * FROM SECTOR WHERE EXPLORATION = explorationId ORDER BY DESIGNATION;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS206OrderSectorBySize(explorationId IN EXPLORATION.ID%type, orderType IN VARCHAR2) RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    if (orderType = 'DESC') then
+        OPEN result for SELECT * FROM SECTOR WHERE EXPLORATION = explorationId ORDER BY AREA DESC;
+    else
+        OPEN result for SELECT * FROM SECTOR WHERE EXPLORATION = explorationId ORDER BY AREA;
+    end if;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS206OrderSectorByCrop(explorationId IN EXPLORATION.ID%type, arg IN VARCHAR2,
+                                                     orderType IN VARCHAR2) RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    if (arg = 'TYPE') then
+        if (orderType = 'DESC') then
+            OPEN result for SELECT SECTOR.ID, DESIGNATION, P.NAME, P.TYPE
+                            FROM SECTOR
+                                     JOIN PRODUCT P on P.ID = SECTOR.PRODUCT
+                            WHERE EXPLORATION = explorationId
+                            ORDER BY P.TYPE DESC;
+            else
+            OPEN result for SELECT SECTOR.ID, DESIGNATION, P.NAME, P.TYPE
+                            FROM SECTOR
+                                     JOIN PRODUCT P on P.ID = SECTOR.PRODUCT
+                            WHERE EXPLORATION = explorationId
+                            ORDER BY P.TYPE;
+        end if;
+
+    else
+        if (orderType = 'DESC') then
+            OPEN result for SELECT SECTOR.ID, DESIGNATION, P.NAME, P.TYPE
+                            FROM SECTOR
+                                     JOIN PRODUCT P on P.ID = SECTOR.PRODUCT
+                            WHERE EXPLORATION = explorationId
+                            ORDER BY P.NAME DESC;
+            else
+            OPEN result for SELECT SECTOR.ID, DESIGNATION, P.NAME, P.TYPE
+                            FROM SECTOR
+                                     JOIN PRODUCT P on P.ID = SECTOR.PRODUCT
+                            WHERE EXPLORATION = explorationId
+                            ORDER BY P.NAME;
+        end if;
+    end if;
+    return result;
+end;
