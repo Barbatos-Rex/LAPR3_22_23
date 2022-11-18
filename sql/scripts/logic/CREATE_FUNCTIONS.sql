@@ -71,7 +71,7 @@ BEGIN
                                      JOIN PRODUCT P on P.ID = SECTOR.PRODUCT
                             WHERE EXPLORATION = explorationId
                             ORDER BY P.TYPE DESC;
-            else
+        else
             OPEN result for SELECT SECTOR.ID, DESIGNATION, P.NAME, P.TYPE
                             FROM SECTOR
                                      JOIN PRODUCT P on P.ID = SECTOR.PRODUCT
@@ -86,13 +86,34 @@ BEGIN
                                      JOIN PRODUCT P on P.ID = SECTOR.PRODUCT
                             WHERE EXPLORATION = explorationId
                             ORDER BY P.NAME DESC;
-            else
+        else
             OPEN result for SELECT SECTOR.ID, DESIGNATION, P.NAME, P.TYPE
                             FROM SECTOR
                                      JOIN PRODUCT P on P.ID = SECTOR.PRODUCT
                             WHERE EXPLORATION = explorationId
                             ORDER BY P.NAME;
         end if;
+    end if;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS207OrderSectorByMaxHarvest(explorationId IN EXPLORATION.ID%type, orderType IN VARCHAR2) RETURN SYS_REFCURSOR AS
+    result SYS_REFCURSOR;
+BEGIN
+    if (orderType = 'DESC') then
+        OPEN result FOR SELECT S.DESIGNATION, max(H.NUMBEROFUNITS) as HARVEST
+                        FROM SECTOR S
+                                 JOIN HARVEST H on S.ID = H.SECTOR
+                        WHERE S.EXPLORATION = explorationId
+                        GROUP BY S.ID, S.DESIGNATION
+                        ORDER BY HARVEST DESC;
+    else
+        OPEN result FOR SELECT S.DESIGNATION, max(H.NUMBEROFUNITS) as HARVEST
+                        FROM SECTOR S
+                                 JOIN HARVEST H on S.ID = H.SECTOR
+                        WHERE S.EXPLORATION = explorationId
+                        GROUP BY S.ID, S.DESIGNATION
+                        ORDER BY HARVEST;
     end if;
     return result;
 end;
