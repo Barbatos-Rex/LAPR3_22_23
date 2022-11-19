@@ -453,10 +453,7 @@ END;
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-  </head>
+  
 <body>
 <table border="0" style="border-collapse:collapse">
 <tr>
@@ -471,14 +468,11 @@ END;
 </body>
 </html>
 
-### FieldRecording
+#### FieldRecording
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-  </head>
+  
 <body>
 <table border="0" style="border-collapse:collapse">
 <tr>
@@ -491,14 +485,10 @@ END;
 </body>
 </html>
 
-### Harvest
+#### Harvest
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-  </head>
 <body>
 <table border="0" style="border-collapse:collapse">
 <tr>
@@ -607,14 +597,11 @@ END;
 </body>
 </html>
 
-### MeteorologicStation
+#### MeteorologicStation
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-  </head>
+  
 <body>
 <table border="0" style="border-collapse:collapse">
 <tr>
@@ -641,14 +628,11 @@ END;
 </body>
 </html>
 
-### Product
+#### Product
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-  </head>
+  
 <body>
 <table border="0" style="border-collapse:collapse">
 <tr>
@@ -685,14 +669,11 @@ END;
 </body>
 </html>
 
-### Sector
+#### Sector
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-  </head>
+  
 <body>
 <table border="0" style="border-collapse:collapse">
 <tr>
@@ -744,12 +725,9 @@ END;
 </body>
 </html>
 
-### SystemUser
+#### SystemUser
 
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-  </head>
+  
 <body>
 <table border="0" style="border-collapse:collapse">
 <tr>
