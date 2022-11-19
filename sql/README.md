@@ -67,9 +67,9 @@ Note: The SQL syntax is case insensitive, so for everything that is related to C
 
 ## Files to Include
 
-* [CREATE TABLES](./CREATE_TABLES.sql)
-* [INITIAL BOOT](./INITIAL_BOOT.sql)
-* [DELETE DATABASE](./DELETE_DATABASE.sql)
+* [CREATE TABLES](./scripts/structure/CREATE_TABLES.sql)
+* [INITIAL BOOT](./scripts/structure/INITIAL_BOOT.sql)
+* [DELETE DATABASE](./scripts/structure/DELETE_DATABASE.sql)
 
 <!--* [CLEAR DATABASE](./CLEAR_DATABASE.sql)  Will be DEPRECATED-->
 
@@ -77,7 +77,7 @@ The database that will be used in this project will
 be [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/)
 
 For clarification on the naming conventions used on this database
-see [this document](./../../conventions/Database%20Naming%20Conventions.md)
+see [this document](./conventions/Database%20Naming%20Conventions.md)
 
 ## Table Creation and Alters
 
@@ -812,12 +812,12 @@ END;
 
 ## Files to Include
 
-* [CREATE PROCEDURES](./CREATE_PROCEDURES.sql)
-* [DELETE PROCEDURES](./DELETE_PROCEDURES.sql)
-* [CREATE FUNCTIONS](./CREATE_FUNCTIONS.sql)
-* [DELETE FUNCTIONS](./DELETE_FUNCTIONS.sql)
-* [CREATE TRIGGERS](./CREATE_TRIGGERS.sql)
-* [DELETE TRIGGERS](./DELETE_TRIGGERS.sql)
+* [CREATE PROCEDURES](./scripts/logic/CREATE_PROCEDURES.sql)
+* [DELETE PROCEDURES](./scripts/logic/DELETE_PROCEDURES.sql)
+* [CREATE FUNCTIONS](./scripts/logic/CREATE_FUNCTIONS.sql)
+* [DELETE FUNCTIONS](./scripts/logic/DELETE_FUNCTIONS.sql)
+* [CREATE TRIGGERS](./scripts/logic/CREATE_TRIGGERS.sql)
+* [DELETE TRIGGERS](./scripts/logic/DELETE_TRIGGERS.sql)
 
 ## Procedures
 
