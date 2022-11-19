@@ -1,6 +1,4 @@
 -- TABLES --
-
-
 CREATE TABLE Address
 (
     id number(10),
@@ -102,7 +100,7 @@ CREATE TABLE FieldRecording
     exploration number(10) NOT NULL,
     PRIMARY KEY (exploration)
 );
-CREATE TABLE FieldRecording_ProductionFactors
+CREATE TABLE ProductionFactorsRecording
 (
     fieldRecording    number(10) NOT NULL,
     productionFactors number(10) NOT NULL,
@@ -146,25 +144,27 @@ CREATE TABLE MeteorologicStation
 );
 CREATE TABLE Product
 (
-    name varchar2(255) NOT NULL,
-    type varchar2(255) NOT NULL,
-    id   number(10),
-    price number(10,2) DEFAULT 0 NOT NULL,
+    name  varchar2(255)           NOT NULL,
+    type  varchar2(255)           NOT NULL,
+    id    number(10),
+    price number(10, 2) DEFAULT 0 NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE ProductionEntry
 (
     id    number(10)    NOT NULL,
-    value varchar2(255) NOT NULL,
-    unit  number(10)    NOT NULL,
+    value number(10)    NOT NULL,
+    unit  varchar2(255) NOT NULL,
     type  varchar2(255) NOT NULL,
-    PRIMARY KEY (id)
+    name  varchar2(255) NOT NULL,
+    PRIMARY KEY (id, name)
 );
 CREATE TABLE ProductionFactors
 (
-    id          number(10),
+    id          number(10) GENERATED AS IDENTITY,
     name        varchar2(255) NOT NULL,
     formulation varchar2(255) NOT NULL,
+    supplier    varchar2(255) NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE ProductionZones
@@ -300,9 +300,9 @@ ALTER TABLE MeteorologicData
     ADD CONSTRAINT FKMeteorolog41417 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
 ALTER TABLE MeteorologicData
     ADD CONSTRAINT FKMeteorolog357263 FOREIGN KEY (station) REFERENCES MeteorologicStation (id);
-ALTER TABLE FieldRecording_ProductionFactors
+ALTER TABLE ProductionFactorsRecording
     ADD CONSTRAINT FKFieldRecor49323 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
-ALTER TABLE FieldRecording_ProductionFactors
+ALTER TABLE ProductionFactorsRecording
     ADD CONSTRAINT FKFieldRecor728316 FOREIGN KEY (productionFactors) REFERENCES ProductionFactors (id);
 ALTER TABLE BasketOrder
     ADD CONSTRAINT FKBasketOrde555898 FOREIGN KEY (driver) REFERENCES Driver (id);

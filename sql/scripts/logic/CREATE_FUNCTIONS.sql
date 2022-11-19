@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION fncUS205CreateUser(userCallerId IN SYSTEMUSER.ID%type
     userId    SYSTEMUSER.ID%TYPE;
     nullEmail SYSTEMUSER.ID%TYPE;
 BEGIN
+    SAVEPOINT BeforeCall;
     SELECT EMAIL into nullEmail FROM SYSTEMUSER WHERE EMAIL = userEmail;
 
     if (nullEmail is not null) then
@@ -39,6 +40,10 @@ BEGIN
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('New System User ID: ' || userId);
     return userId;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT BeforeCall;
+        RAISE;
 end;
 
 
@@ -130,7 +135,7 @@ BEGIN
                                  JOIN PRODUCT P on P.ID = S.PRODUCT
                                  JOIN HARVEST H on S.ID = H.SECTOR
                         WHERE S.EXPLORATION = explorationId
-                        GROUP BY S.DESIGNATION,P.PRICE
+                        GROUP BY S.DESIGNATION, P.PRICE
                         ORDER BY 2 DESC;
     else
         OPEN result FOR SELECT S.DESIGNATION, avg(H.NUMBEROFUNITS) * P.PRICE
@@ -138,7 +143,7 @@ BEGIN
                                  JOIN PRODUCT P on P.ID = S.PRODUCT
                                  JOIN HARVEST H on S.ID = H.SECTOR
                         WHERE S.EXPLORATION = explorationId
-                        GROUP BY S.DESIGNATION,P.PRICE
+                        GROUP BY S.DESIGNATION, P.PRICE
                         ORDER BY 2;
     end if;
     return result;
