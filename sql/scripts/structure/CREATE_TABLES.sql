@@ -211,7 +211,7 @@ CREATE TABLE Stable
 );
 CREATE TABLE SystemUser
 (
-    id       number(10),
+    id       number(10) GENERATED AS IDENTITY,
     email    varchar2(255) NOT NULL UNIQUE,
     password varchar2(255) NOT NULL,
     PRIMARY KEY (id)

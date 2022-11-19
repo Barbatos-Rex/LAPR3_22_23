@@ -1,4 +1,4 @@
---CLEAN DATABASE--
+--CLEAN DATABASE DEPRECATED--
 
 DELETE Address;
 DELETE AuditLog;
@@ -29,7 +29,7 @@ DELETE Sector;
 DELETE Sensor;
 DELETE Silos;
 DELETE SprinklingSystem;
-DELETE S;
+DELETE STABLE;
 DELETE SystemUser;
 DELETE TubularSystem;
 DELETE Valve;

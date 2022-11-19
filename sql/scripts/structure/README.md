@@ -1,12 +1,12 @@
-# Files to Include
+# Database Physical Structure
+
+## Files to Include
 
 * [CREATE TABLES](./CREATE_TABLES.sql)
 * [INITIAL BOOT](./INITIAL_BOOT.sql)
 * [DELETE DATABASE](./DELETE_DATABASE.sql)
 
 <!--* [CLEAR DATABASE](./CLEAR_DATABASE.sql)  Will be DEPRECATED-->
-
-# Database Physical Structure
 
 The database that will be used in this project will
 be [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/)
@@ -742,11 +742,3 @@ END;
 </tr>
 </table>
 </body>
-
-
-
-
-
-
-
-
