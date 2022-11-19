@@ -49,7 +49,8 @@ BEGIN
     return result;
 end;
 
-CREATE OR REPLACE FUNCTION fncUS206OrderSectorBySize(explorationId IN EXPLORATION.ID%type, orderType IN VARCHAR2) RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS206OrderSectorBySize(explorationId IN EXPLORATION.ID%type,
+                                                     orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
     if (orderType = 'DESC') then
@@ -61,7 +62,7 @@ BEGIN
 end;
 
 CREATE OR REPLACE FUNCTION fncUS206OrderSectorByCrop(explorationId IN EXPLORATION.ID%type, arg IN VARCHAR2,
-                                                     orderType IN VARCHAR2) RETURN SYS_REFCURSOR AS
+                                                     orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
     if (arg = 'TYPE') then
@@ -97,7 +98,8 @@ BEGIN
     return result;
 end;
 
-CREATE OR REPLACE FUNCTION fncUS207OrderSectorByMaxHarvest(explorationId IN EXPLORATION.ID%type, orderType IN VARCHAR2) RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS207OrderSectorByMaxHarvest(explorationId IN EXPLORATION.ID%type,
+                                                           orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
     result SYS_REFCURSOR;
 BEGIN
     if (orderType = 'DESC') then
@@ -114,6 +116,30 @@ BEGIN
                         WHERE S.EXPLORATION = explorationId
                         GROUP BY S.ID, S.DESIGNATION
                         ORDER BY HARVEST;
+    end if;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS207OrderSectorByRentability(explorationId IN EXPLORATION.ID%type,
+                                                            orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR as
+    result Sys_Refcursor;
+BEGIN
+    IF (orderType = 'DESC') then
+        OPEN result FOR SELECT S.DESIGNATION, avg(H.NUMBEROFUNITS) * P.PRICE
+                        FROM SECTOR S
+                                 JOIN PRODUCT P on P.ID = S.PRODUCT
+                                 JOIN HARVEST H on S.ID = H.SECTOR
+                        WHERE S.EXPLORATION = explorationId
+                        GROUP BY S.DESIGNATION,P.PRICE
+                        ORDER BY 2 DESC;
+    else
+        OPEN result FOR SELECT S.DESIGNATION, avg(H.NUMBEROFUNITS) * P.PRICE
+                        FROM SECTOR S
+                                 JOIN PRODUCT P on P.ID = S.PRODUCT
+                                 JOIN HARVEST H on S.ID = H.SECTOR
+                        WHERE S.EXPLORATION = explorationId
+                        GROUP BY S.DESIGNATION,P.PRICE
+                        ORDER BY 2;
     end if;
     return result;
 end;

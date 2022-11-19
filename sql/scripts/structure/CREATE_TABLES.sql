@@ -3,12 +3,12 @@
 
 CREATE TABLE Address
 (
-    id number(10) GENERATED AS IDENTITY,
+    id number(10),
     PRIMARY KEY (id)
 );
 CREATE TABLE AuditLog
 (
-    id           number(10)    GENERATED AS IDENTITY,
+    id           number(10),
     dateOfAction date          NOT NULL,
     userId       number(10)    NOT NULL,
     type         varchar2(255) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE AuditLog
 );
 CREATE TABLE Basket
 (
-    id             number(10) GENERATED AS IDENTITY,
+    id             number(10),
     dateOfCreation date       NOT NULL,
     price          number(19) NOT NULL,
     PRIMARY KEY (id)
@@ -42,7 +42,7 @@ CREATE TABLE BasketProduct
 );
 CREATE TABLE Building
 (
-    id          number(10) GENERATED AS IDENTITY,
+    id          number(10),
     exploration number(10) NOT NULL,
     PRIMARY KEY (id)
 );
@@ -81,7 +81,7 @@ CREATE TABLE Driver
 );
 CREATE TABLE Exploration
 (
-    id      number(10) GENERATED AS IDENTITY,
+    id      number(10),
     address number(10),
     PRIMARY KEY (id)
 );
@@ -140,7 +140,7 @@ CREATE TABLE MeteorologicData
 );
 CREATE TABLE MeteorologicStation
 (
-    id number(10) GENERATED AS IDENTITY,
+    id   number(10) GENERATED AS IDENTITY,
     name VARCHAR2(255),
     PRIMARY KEY (id)
 );
@@ -148,7 +148,8 @@ CREATE TABLE Product
 (
     name varchar2(255) NOT NULL,
     type varchar2(255) NOT NULL,
-    id   number(10) GENERATED AS IDENTITY,
+    id   number(10),
+    price number(10,2) DEFAULT 0 NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE ProductionEntry
@@ -161,7 +162,7 @@ CREATE TABLE ProductionEntry
 );
 CREATE TABLE ProductionFactors
 (
-    id          number(10) GENERATED AS IDENTITY,
+    id          number(10),
     name        varchar2(255) NOT NULL,
     formulation varchar2(255) NOT NULL,
     PRIMARY KEY (id)
@@ -173,7 +174,7 @@ CREATE TABLE ProductionZones
 );
 CREATE TABLE Sector
 (
-    id                  number(10) GENERATED AS IDENTITY,
+    id                  number(10),
     designation         varchar2(255) NOT NULL,
     area                number(19)    NOT NULL,
     exploration         number(10)    NOT NULL,
@@ -184,7 +185,7 @@ CREATE TABLE Sector
 );
 CREATE TABLE Sensor
 (
-    id      number(10) GENERATED AS IDENTITY,
+    id      number(10),
     station number(10) NOT NULL,
     CONSTRAINT id
         PRIMARY KEY (id)
@@ -210,19 +211,19 @@ CREATE TABLE Stable
 );
 CREATE TABLE SystemUser
 (
-    id       number(10) GENERATED AS IDENTITY,
+    id       number(10),
     email    varchar2(255) NOT NULL UNIQUE,
     password varchar2(255) NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE TubularSystem
 (
-    id number(10) GENERATED AS IDENTITY,
+    id number(10),
     PRIMARY KEY (id)
 );
 CREATE TABLE Valve
 (
-    id            number(10) GENERATED AS IDENTITY,
+    id            number(10),
     tubularSystem number(10) NOT NULL,
     PRIMARY KEY (id)
 );
