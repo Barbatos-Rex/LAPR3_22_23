@@ -11,6 +11,7 @@ that are scattered along this project. This project will have into account the f
 
 
 # Database Naming Conventions
+* [Check isolated file](./conventions/Database%20Naming%20Conventions.md)
 
 ## Rules
 
@@ -57,6 +58,15 @@ Note: The SQL syntax is case insensitive, so for everything that is related to C
 
 * [Check isolated file](./docs/README.md)
 
+## Dictionary
+
+## Conceptual Model
+
+## Logical Model
+![MER](docs/logical.svg)
+
+
+
 
 # Scripts
 
@@ -64,6 +74,110 @@ Note: The SQL syntax is case insensitive, so for everything that is related to C
 * [Check isolated file (Database Logic)](./scripts/logic/README.md)
 
 # Database Physical Structure
+
+## Technology
+
+A database is an organized collection of structured information, or data, typically stored electronically in a computer system.
+A database is usually controlled by a database management system (DBMS). Together, the data and the DBMS, along with the applications 
+that are associated with them, are referred to as a database system, often shortened to just database.
+
+Data within the most common types of databases in operation today is typically modeled in rows and columns in a series of
+tables to make processing and data querying efficient. The data can then be easily accessed, managed, modified, updated, 
+controlled, and organized. Most databases use structured query language (SQL) for writing and querying data.
+Popular examples are:
+* [Oracle XE](https://www.oracle.com/database/technologies/appdev/xe.html)
+* [My SQL](https://www.mysql.com/)
+* [SQL Server](https://www.microsoft.com/pt-br/sql-server/sql-server-downloads)
+* [PostgreSQL](https://www.postgresql.org/)
+
+Nevertheless, there are other types of databases that deviate from such specification, non-relational (or no SQL) databases.
+A NoSQL, or non relational database, allows unstructured and semi structured (making use of schemas) data to be stored and manipulated (in contrast to 
+a relational database, which defines how all data inserted into the database must be composed). NoSQL databases grew popular 
+as web applications became more common and more complex.
+Popular examples are:
+* [Mongo DB](https://www.mongodb.com/)
+* [Apache Cassandra](https://cassandra.apache.org/_/index.html)
+* [Neo4J](https://neo4j.com/)
+* [Redis](https://redis.io/)
+
+[Reference](https://www.oracle.com/pt/database/what-is-database/)
+
+Relational databases work with structured data. They support ACID transactional consistency and provide a flexible way to 
+structure data that is not possible with other database technologies. Key features of relational databases include the 
+ability to make two tables look like one, join multiple tables together on key fields, create complex indexes that perform 
+well and are easy to manage, and maintain data integrity for maximum data accuracy.
+
+The relational database is a system of storing and retrieving data in which the content of the data is stored in tables, 
+rows, columns, or fields. When you have multiple pieces of information that need to be related to one another then it is 
+important to store them in this type of format; otherwise, you would just end up with a bunch of unrelated facts and figures
+without any ties between them.
+
+There are many benefits associated with using a relational database for managing your data needs. For instance, if you want
+to view all the contacts in your phone book (or other types) then all you would need to do is enter one query into the search 
+bar and instantly see every contact listed there. This saves time from having to manually go through.
+
+The relational database benefits are discussed briefly.
+
+1. **Simplicity of Model**
+
+In contrast to other types of database models, the relational database model is much simpler. It does not require any complex queries because it has no query processing or structuring so simple SQL queries are enough to handle the data.
+
+2. **Ease of Use**
+
+Users can easily access/retrieve their required information within seconds without indulging in the complexity of the database. Structured Query Language (SQL) is used to execute complex queries.
+
+3. **Accuracy**
+
+A key feature of relational databases is that they’re strictly defined and well-organized, so data doesn’t get duplicated. Relational databases have accuracy because of their structure with no data duplication.
+
+4.  **Data Integrity**
+
+RDBMS databases are also widely used for data integrity as they provide consistency across all tables. The data integrity ensures the features like accuracy and ease of use.
+
+5. **Normalization**
+As data becomes more and more complex, the need for efficient ways of storing it increases. Normalization is a method that breaks down information into manageable chunks to reduce storage size. Data can be broken up into different levels with any level requiring preparation before moving onto another level of normalizing your data.
+
+Database normalization also ensures that a relational database has no variety or variance in its structure and can be manipulated accurately. This ensures that integrity is maintained when using data from this database for your business decisions.
+
+6. **Collaboration**
+
+Multiple users can access the database to retrieve information at the same time and even if data is being updated.
+
+7. **Security**
+
+Data is secure as Relational Database Management System allows only authorized users to directly access the data. No unauthorized user can access the information.
+
+
+Although there are more benefits of using relational databases, it has some limitations also. Let’s see the limitations or disadvantages of using the relational database.
+
+1. **Maintenance Problem**
+
+The maintenance of the relational database becomes difficult over time due to the increase in the data. Developers and programmers have to spend a lot of time maintaining the database.
+
+2. **Cost**
+
+The relational database system is costly to set up and maintain. The initial cost of the software alone can be quite pricey for smaller businesses, but it gets worse when you factor in hiring a professional technician who must also have expertise with that specific kind of program.
+
+3. **Physical Storage**
+
+A relational database is comprised of rows and columns, which requires a lot of physical memory because each operation performed depends on separate storage. The requirements of physical memory may increase along with the increase of data.
+
+4. **Lack of Scalability**
+
+While using the relational database over multiple servers, its structure changes and becomes difficult to handle, especially when the quantity of the data is large. Due to this, the data is not scalable on different physical storage servers. Ultimately, its performance is affected i.e. lack of availability of data and load time etc. As the database becomes larger or more distributed with a greater number of servers, this will have negative effects like latency and availability issues affecting overall performance.
+
+5. **Complexity in Structure**
+
+Relational databases can only store data in tabular form which makes it difficult to represent complex relationships between objects. This is an issue because many applications require more than one table to store all the necessary data required by their application logic.
+
+6. **Decrease in performance over time**
+
+The relational database can become slower, not just because of its reliance on multiple tables. When there is a large number of tables and data in the system, it causes an increase in complexity. It can lead to slow response times over queries or even complete failure for them depending on how many people are logged into the server at a given time.
+
+[Reference](https://databasetown.com/relational-database-benefits-and-limitations/)
+
+For this project a **Relational Database (SQL Database)** was chosen due to having more upsides than downsides and for the downsides.
+
 
 ## Files to Include
 
@@ -85,12 +199,14 @@ see [this document](./conventions/Database%20Naming%20Conventions.md)
 -- TABLES --
 CREATE TABLE Address
 (
-    id number(10),
+    id       number(10) GENERATED BY DEFAULT AS IDENTITY,
+    zipcode  VARCHAR2(255),
+    district VARCHAR2(255) DEFAULT 'PORTO',
     PRIMARY KEY (id)
 );
 CREATE TABLE AuditLog
 (
-    id           number(10),
+    id           number(10) GENERATED BY DEFAULT AS IDENTITY,
     dateOfAction date          NOT NULL,
     userId       number(10)    NOT NULL,
     type         varchar2(255) NOT NULL,
@@ -101,37 +217,55 @@ CREATE TABLE AuditLog
 );
 CREATE TABLE Basket
 (
-    id             number(10),
+    id             number(10) GENERATED BY DEFAULT AS IDENTITY,
     dateOfCreation date       NOT NULL,
     price          number(19) NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE BasketOrder
 (
-    client   number(10) NOT NULL,
-    basket   number(10) NOT NULL,
-    quantity number(10) NOT NULL,
-    driver   number(10) NOT NULL,
+    client       number(10) NOT NULL,
+    basket       number(10) NOT NULL,
+    quantity     number(10) NOT NULL,
+    driver       number(10),
+    orderDate    date          DEFAULT SYSDATE,
+    dueDate      date          DEFAULT SYSDATE + 10,
+    deliveryDate date          DEFAULT SYSDATE + 30,
+    status       VARCHAR2(255) DEFAULT 'REGISTERED',
+    address      number(10) NOT NULL,
+    orderNumber  number(10) GENERATED ALWAYS AS IDENTITY,
+    payed        VARCHAR2(1)   DEFAULT 'N',
     PRIMARY KEY (client,
-                 basket)
+                 basket, orderDate)
 );
 CREATE TABLE BasketProduct
 (
-    basket  number(10) NOT NULL,
-    product number(10) NOT NULL,
+    basket   number(10) NOT NULL,
+    product  number(10) NOT NULL,
+    quantity number(10) DEFAULT 1,
     PRIMARY KEY (basket,
                  product)
 );
 CREATE TABLE Building
 (
-    id          number(10),
+    id          number(10) GENERATED BY DEFAULT AS IDENTITY,
     exploration number(10) NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE Client
 (
-    id      number(10) NOT NULL,
-    address number(10),
+    id                number(10)                 NOT NULL,
+    address           number(10)                 NOT NULL,
+    name              varchar2(255)              NOT NULL,
+    nif               number(10)                 NOT NULL,
+    plafond           number(10)  DEFAULT 100000 NOT NULL,
+    incidents         number(10)  DEFAULT 0      NOT NULL,
+    lastIncidentDate  date,
+    lastYearOrders    number(10)  DEFAULT 0      NOT NULL,
+    lastYearSpent     number(10)  DEFAULT 0      NOT NULL,
+    addressOfDelivery number(10)                 NOT NULL,
+    priorityLevel     varchar2(1) DEFAULT 'B'    NOT NULL,
+    lastYearIncidents number(10)  DEFAULT 0      NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE CropWatering
@@ -163,7 +297,7 @@ CREATE TABLE Driver
 );
 CREATE TABLE Exploration
 (
-    id      number(10),
+    id      number(10) GENERATED BY DEFAULT AS IDENTITY,
     address number(10),
     PRIMARY KEY (id)
 );
@@ -184,7 +318,7 @@ CREATE TABLE FieldRecording
     exploration number(10) NOT NULL,
     PRIMARY KEY (exploration)
 );
-CREATE TABLE FieldRecording_ProductionFactors
+CREATE TABLE ProductionFactorsRecording
 (
     fieldRecording    number(10) NOT NULL,
     productionFactors number(10) NOT NULL,
@@ -230,23 +364,25 @@ CREATE TABLE Product
 (
     name  varchar2(255)           NOT NULL,
     type  varchar2(255)           NOT NULL,
-    id    number(10),
+    id    number(10) GENERATED BY DEFAULT AS IDENTITY,
     price number(10, 2) DEFAULT 0 NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE ProductionEntry
 (
     id    number(10)    NOT NULL,
-    value varchar2(255) NOT NULL,
-    unit  number(10)    NOT NULL,
+    value number(10)    NOT NULL,
+    unit  varchar2(255) NOT NULL,
     type  varchar2(255) NOT NULL,
-    PRIMARY KEY (id)
+    name  varchar2(255) NOT NULL,
+    PRIMARY KEY (id, name)
 );
 CREATE TABLE ProductionFactors
 (
-    id          number(10),
+    id          number(10) GENERATED BY DEFAULT AS IDENTITY,
     name        varchar2(255) NOT NULL,
     formulation varchar2(255) NOT NULL,
+    supplier    varchar2(255) NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE ProductionZones
@@ -256,7 +392,7 @@ CREATE TABLE ProductionZones
 );
 CREATE TABLE Sector
 (
-    id                  number(10),
+    id                  number(10) GENERATED BY DEFAULT AS IDENTITY,
     designation         varchar2(255) NOT NULL,
     area                number(19)    NOT NULL,
     exploration         number(10)    NOT NULL,
@@ -267,7 +403,7 @@ CREATE TABLE Sector
 );
 CREATE TABLE Sensor
 (
-    id      number(10),
+    id      number(10) GENERATED BY DEFAULT AS IDENTITY,
     station number(10) NOT NULL,
     CONSTRAINT id
         PRIMARY KEY (id)
@@ -293,7 +429,7 @@ CREATE TABLE Stable
 );
 CREATE TABLE SystemUser
 (
-    id       number(10),
+    id       number(10) GENERATED BY DEFAULT AS IDENTITY,
     email    varchar2(255) NOT NULL UNIQUE,
     password varchar2(255) NOT NULL,
     PRIMARY KEY (id)
@@ -305,7 +441,7 @@ CREATE TABLE TubularSystem
 );
 CREATE TABLE Valve
 (
-    id            number(10),
+    id            number(10) GENERATED BY DEFAULT AS IDENTITY,
     tubularSystem number(10) NOT NULL,
     PRIMARY KEY (id)
 );
@@ -318,6 +454,8 @@ ALTER TABLE FarmingManager
     ADD CONSTRAINT FKFarmingMan732235 FOREIGN KEY (id) REFERENCES SystemUser (id);
 ALTER TABLE Client
     ADD CONSTRAINT FKClient543685 FOREIGN KEY (id) REFERENCES SystemUser (id);
+ALTER TABLE Client
+    ADD CONSTRAINT FKClient934999 FOREIGN KEY (addressOfDelivery) REFERENCES Address (id);
 ALTER TABLE DistributionManager
     ADD CONSTRAINT FKDistributi353489 FOREIGN KEY (id) REFERENCES SystemUser (id);
 ALTER TABLE Stable
@@ -382,9 +520,9 @@ ALTER TABLE MeteorologicData
     ADD CONSTRAINT FKMeteorolog41417 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
 ALTER TABLE MeteorologicData
     ADD CONSTRAINT FKMeteorolog357263 FOREIGN KEY (station) REFERENCES MeteorologicStation (id);
-ALTER TABLE FieldRecording_ProductionFactors
+ALTER TABLE ProductionFactorsRecording
     ADD CONSTRAINT FKFieldRecor49323 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
-ALTER TABLE FieldRecording_ProductionFactors
+ALTER TABLE ProductionFactorsRecording
     ADD CONSTRAINT FKFieldRecor728316 FOREIGN KEY (productionFactors) REFERENCES ProductionFactors (id);
 ALTER TABLE BasketOrder
     ADD CONSTRAINT FKBasketOrde555898 FOREIGN KEY (driver) REFERENCES Driver (id);
@@ -394,11 +532,14 @@ ALTER TABLE BasketProduct
     ADD CONSTRAINT FKBasketProd544770 FOREIGN KEY (product) REFERENCES Product (id);
 ALTER TABLE AuditLog
     ADD CONSTRAINT FKAuditLog926921 FOREIGN KEY (userId) REFERENCES SystemUser (id);
+ALTER TABLE BasketOrder
+    ADD CONSTRAINT FKBasketOrde901265 FOREIGN KEY (address) REFERENCES Address (id);
 ```
 
 ## Delete Database
 
 ```sql
+--DELETE DATABASE--
 DROP TABLE Address CASCADE CONSTRAINTS PURGE;
 DROP TABLE AuditLog CASCADE CONSTRAINTS PURGE;
 DROP TABLE Basket CASCADE CONSTRAINTS PURGE;
@@ -414,7 +555,7 @@ DROP TABLE Exploration CASCADE CONSTRAINTS PURGE;
 DROP TABLE ExplorationClientele CASCADE CONSTRAINTS PURGE;
 DROP TABLE FarmingManager CASCADE CONSTRAINTS PURGE;
 DROP TABLE FieldRecording CASCADE CONSTRAINTS PURGE;
-DROP TABLE FieldRecording_ProductionFactors CASCADE CONSTRAINTS PURGE;
+DROP TABLE PRODUCTIONFACTORSRECORDING CASCADE CONSTRAINTS PURGE;
 DROP TABLE Harvest CASCADE CONSTRAINTS PURGE;
 DROP TABLE Hub CASCADE CONSTRAINTS PURGE;
 DROP TABLE MachineryGarage CASCADE CONSTRAINTS PURGE;
@@ -818,8 +959,47 @@ END;
 * [DELETE FUNCTIONS](./scripts/logic/DELETE_FUNCTIONS.sql)
 * [CREATE TRIGGERS](./scripts/logic/CREATE_TRIGGERS.sql)
 * [DELETE TRIGGERS](./scripts/logic/DELETE_TRIGGERS.sql)
+* [CREATE VIEWS](./scripts/logic/CREATE_VIEWS.sql)
+* [DELETE VIEWS](./scripts/logic/DELETE_VIEWS.sql)
 
 ## Procedures
+
+### US205
+
+#### prcUS205AlterClientLastYearInfo
+
+This procedure has the objective of altering the client's information regarding last year operations, recieving the id
+of the client,
+the number of orders and the amount spent on said orders, updating said information.
+
+```sql
+CREATE OR REPLACE PROCEDURE prcUS205AlterClientLastYearInfo(clientId IN SYSTEMUSER.ID%type,
+                                                            numberOfOrders IN CLIENT.LASTYEARORDERS%type DEFAULT NULL,
+                                                            spentOnOrders IN CLIENT.LASTYEARSPENT%type DEFAULT NULL) as
+
+
+    newOrders CLIENT.LASTYEARORDERS%type;
+    newSpent  CLIENT.LASTYEARSPENT%type;
+BEGIN
+
+    SELECT LASTYEARORDERS, LASTYEARSPENT INTO newOrders,newSpent FROM CLIENT WHERE ID = clientId;
+
+    if (numberOfOrders IS NOT NULL) THEN
+        newOrders := numberOfOrders;
+    end if;
+
+    if (spentOnOrders IS NOT NULL) THEN
+        newSpent := spentOnOrders;
+    end if;
+
+
+    UPDATE CLIENT SET LASTYEARORDERS = newOrders, LASTYEARSPENT = newSpent WHERE CLIENT.ID = clientId;
+end;
+```
+
+```sql
+DROP PROCEDURE prcUS205AlterClientLastYearInfo;
+```
 
 ### US206
 
@@ -856,20 +1036,223 @@ end;
 DROP PROCEDURE PRCUS206CREATESECTOR;
 ```
 
+### US208
+
+Como Gestor Agrícola, quero manter os fatores de produção classificados por tipo
+(fertilizante, correctivo mineral, produto fitofármaco, etc.), incluindo a sua ficha técnica – que deve
+ser persistida na base de dados.
+
+Critério de Aceitação:
+
+1. Um utilizador pode configurar fatores de produção.
+2. É possível persistir na base de dados uma ficha técnica semelhante à da Fig. 3.
+    1. O modelo de dados inclui as tabelas necessárias para persistir fichas técnicas
+    2. Está disponível o código para persistir uma ficha técnica (nome comercial, fornecedor,
+       tipo de fator de produção) e cada um dos seus elementos (categoria, como por exemplo
+       SUSTÂNCIA ORGÂNICAS, substância, quantidade e unidade)
+
+#### prcUS208AddProductionFactor
+
+This function will add an entry to the production factors used in the exploration, receiving the id of the user
+who called this function, the id of the exploration, the commercial name of the product, the formulation of the product,
+the name of the supplier chain or enterprise and will return the id of said factor.
+
+```sql
+CREATE OR REPLACE PROCEDURE prcUS208AddProductionFactor(userCallerId in SYSTEMUSER.ID%type,
+                                                        fieldRecordingId IN FIELDRECORDING.EXPLORATION%type,
+                                                        productName IN PRODUCTIONFACTORS.NAME%type,
+                                                        productFormulation IN PRODUCTIONFACTORS.FORMULATION%type,
+                                                        supplierName IN PRODUCTIONFACTORS.SUPPLIER%type,
+                                                        productFactorId OUT PRODUCTIONFACTORS.ID%type) AS
+    dateToUse DATE := sysdate;
+BEGIN
+    SAVEPOINT BeforeCall;
+    INSERT INTO PRODUCTIONFACTORS(NAME, FORMULATION, SUPPLIER)
+    VALUES (productName, productFormulation, supplierName)
+    returning ID into productFactorId;
+
+    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
+    VALUES (dateToUse, userCallerId, 'INSERT', 'INSERT INTO PRODUCTIONFACTORS(NAME, FORMULATION,SUPPLIER)
+    VALUES (' || productName || ',' || productFormulation || ',' || supplierName || ')');
+
+    INSERT INTO PRODUCTIONFACTORSRECORDING(FIELDRECORDING, PRODUCTIONFACTORS, DATEOFRECORDING)
+    VALUES (fieldRecordingId, productFactorId, dateToUse);
+    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
+    VALUES (dateToUse, userCallerId, 'INSERT', 'INSERT INTO PRODUCTIONFACTORSRECORDING(FIELDRECORDING, PRODUCTIONFACTORS, DATEOFRECORDING)
+    VALUES (' || fieldRecordingId || ',' || productFactorId || ',' || dateToUse || ')');
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Added factor to the database');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Could not create the entry for the product');
+        ROLLBACK TO SAVEPOINT BeforeCall;
+end;
+```
+
+```sql
+DROP FUNCTION prcUS208AddProductionFactor;
+```
+
+#### prcUS208AddEntryToProductionFactor
+
+This function will add an entry to the composition of a certain production factor used in the exploration, receiving the
+id of the user
+who called this function, the id of the factor, the name of the entry, the unit of the entry (ex. mL, Kg/m^3, etc.),
+the amount present on the product and the type of the entry.
+
+```sql
+CREATE OR REPLACE PROCEDURE prcUS208AddProductionFactor(userCallerId in SYSTEMUSER.ID%type,
+                                                        fieldRecordingId IN FIELDRECORDING.EXPLORATION%type,
+                                                        productName IN PRODUCTIONFACTORS.NAME%type,
+                                                        productFormulation IN PRODUCTIONFACTORS.FORMULATION%type,
+                                                        supplierName IN PRODUCTIONFACTORS.SUPPLIER%type,
+                                                        productFactorId OUT PRODUCTIONFACTORS.ID%type) AS
+    dateToUse DATE := sysdate;
+BEGIN
+    SAVEPOINT BeforeCall;
+    INSERT INTO PRODUCTIONFACTORS(NAME, FORMULATION, SUPPLIER)
+    VALUES (productName, productFormulation, supplierName)
+    returning ID into productFactorId;
+
+    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
+    VALUES (dateToUse, userCallerId, 'INSERT', 'INSERT INTO PRODUCTIONFACTORS(NAME, FORMULATION,SUPPLIER)
+    VALUES (' || productName || ',' || productFormulation || ',' || supplierName || ')');
+
+    INSERT INTO PRODUCTIONFACTORSRECORDING(FIELDRECORDING, PRODUCTIONFACTORS, DATEOFRECORDING)
+    VALUES (fieldRecordingId, productFactorId, dateToUse);
+    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
+    VALUES (dateToUse, userCallerId, 'INSERT', 'INSERT INTO PRODUCTIONFACTORSRECORDING(FIELDRECORDING, PRODUCTIONFACTORS, DATEOFRECORDING)
+    VALUES (' || fieldRecordingId || ',' || productFactorId || ',' || dateToUse || ')');
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Added factor to the database');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Could not create the entry for the product');
+        ROLLBACK TO SAVEPOINT BeforeCall;
+end;
+
+CREATE OR REPLACE PROCEDURE prcUS208AddEntryToProductionFactor(userCallerId in SYSTEMUSER.ID%type,
+                                                               productFactorId in PRODUCTIONFACTORS.ID%type,
+                                                               entryName IN PRODUCTIONENTRY.NAME%type,
+                                                               unitName IN PRODUCTIONENTRY.UNIT%type,
+                                                               unitValue IN PRODUCTIONENTRY.VALUE%type,
+                                                               unitType IN PRODUCTIONENTRY.TYPE%type) AS
+BEGIN
+    SAVEPOINT BeforeCall;
+    INSERT INTO PRODUCTIONENTRY(ID, VALUE, UNIT, TYPE, NAME)
+    VALUES (productFactorId, unitValue, unitName, unitType, entryName);
+    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
+    VALUES (sysdate, userCallerId, 'INSERT', 'INSERT INTO PRODUCTIONENTRY(ID, VALUE, UNIT, TYPE, NAME)
+    VALUES (' || productFactorId || ',' || unitValue || ',' || unitName || ',' || unitType || ',' || entryName || ')');
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Added entry to the database');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Could add the entry for the product');
+        ROLLBACK TO SAVEPOINT BeforeCall;
+end;
+```
+
+```sql
+DROP PROCEDURE prcUS208AddEntryToProductionFactor;
+```
+
+### prcUS209OrderBasket
+
+This procedure will order a certain amount of a basket to an user; it will receive the id of the client, the id of the
+basket,
+the amount of baskets, the due date to pay the order, the address to deliver the basket, the probable date of deliver of
+the product.
+For that, this procedure will validate if the order (plus all the unpaid orders) surpasses the plafond of the client,
+proceeding with the order if the plafond is not exceeded.
+
+```sql
+CREATE OR REPLACE PROCEDURE prcUS209OrderBasket(clientId IN SYSTEMUSER.ID%type, basketId IN BASKETORDER.BASKET%type,
+                                                numberOfBaskets IN BASKETORDER.QUANTITY%type,
+                                                orderDueDate IN BASKETORDER.DUEDATE%type DEFAULT SYSDATE + 10,
+                                                deliveryAddress IN BASKETORDER.ADDRESS%type DEFAULT NULL,
+                                                orderDeliveryDate IN BASKETORDER.DELIVERYDATE%type DEFAULT SYSDATE + 30) AS
+
+    unpaidValue   NUMERIC;
+    basketPrice   NUMERIC;
+    orderPrice    NUMERIC;
+    clientPlafond NUMERIC;
+BEGIN
+
+    SELECT (SELECT sum(P.PRICE)
+            FROM BASKET
+                     JOIN BASKETPRODUCT B on BASKET.ID = B.BASKET
+                     JOIN PRODUCT P on P.ID = B.PRODUCT
+            WHERE BASKET.ID = PARENT.BASKET) * PARENT.QUANTITY
+    into unpaidValue
+    FROM BASKETORDER PARENT
+    WHERE CLIENT = clientId
+      AND PAYED = 'N';
+
+    SELECT sum(P.PRICE)
+    into basketPrice
+    FROM BASKETPRODUCT B
+             JOIN PRODUCT P on P.ID = B.PRODUCT
+    WHERE B.BASKET = basketId;
+
+    orderPrice := basketPrice * numberOfBaskets;
+    SELECT PLAFOND into clientPlafond from CLIENT where ID = clientId;
+
+    if (clientPlafond < orderPrice + unpaidValue) then
+        raise_application_error(-20005, 'Order exceeds client plafond limit!');
+    end if;
+
+    INSERT INTO BASKETORDER(CLIENT, BASKET, QUANTITY, DUEDATE, DELIVERYDATE, ADDRESS)
+    VALUES (clientId, basketId, numberOfBaskets, orderDueDate, orderDeliveryDate, deliveryAddress);
+
+end;
+```
+
+```sql
+DROP PROCEDURE prcUS209OrderBasket;
+```
+
 ## Functions
 
 ### US205
 
 Como Gestor Agrícola, quero gerir os meus clientes, empresas ou particulares, que
-compram os bens produzidos na minha exploração agrícola.
+compram os bens produzidos na minha exploração agrícola. Um cliente é caracterizado por um
+código interno, nome, número fiscal, email, morada de correspondência, morada de entrega,
+plafond, número de incidentes, data do último incidente, número de encomendas colocadas no
+último ano, valor total das encomendas colocadas no último ano. A morada deve incluir o código
+postal que é utilizado para análises de vendas. O plafond é o limite máximo de crédito atribuído o
+cliente – os clientes não podem ter um valor total de encomendas pendentes de pagamento superior
+ao seu plafond. Os incidentes – pagamentos de encomendas que não foram efetuados na data de
+vencimento, são caracterizados por cliente, valor, data em que ocorreram e data em que foram
+sanados e devem ser registados. A cada cliente é atribuído um nível (A, B, C) que caracteriza o seu
+valor para o negócio. Clientes que não tenham incidentes reportados nos últimos 12 meses e que
+tenham um volume total de vendas (encomendas pagas) no mesmo período superior a 10000€ são
+do nível A; clientes sem incidentes reportados nos últimos 12 meses e que tenham um volume total
+de vendas (encomendas pagas) no mesmo período superior a 5000€ são do nível B; clientes que
+tenham incidentes reportados nos últimos 12 meses são do nível C independentemente do volume
+de vendas.
 
 Critério de Aceitação:
 
-1. Um utilizador pode inserir um novo Cliente no Base de Dados, com os dados que descrevem
+1. Um utilizador pode inserir um novo Cliente na Base de Dados, com os dados que descrevem
    um cliente, sem a necessidade de escrever código SQL. Se a inserção for bem-sucedida, o utilizador
    é informado sobre o valor da chave primária do novo cliente
 2. Quando o processo de inserção falha, o utilizador é informado sobre o erro que pode ter
    ocorrido.
+3. O administrador pode executar um procedimento que atualiza o número e o valor total das
+   encomendas colocadas no último ano por cada cliente
+4. Criar uma View que agregue para cada cliente:
+    1. o seu nível (A, B, C),
+    2. a data do último incidente – ou a menção “Sem incidentes à data” caso não tenha
+       incidentes reportados
+    3. o volume total de vendas (encomendas pagas) nos últimos 12 meses e
+    4. o volume total das encomendas já entregues mas ainda pendentes de pagamento.
+5. implemente uma função que retorna o fator de risco de um cliente. O fator de risco de um
+   cliente é dado pelo rácio entre o valor total dos incidentes observados nos últimos 12 meses e o
+   número de encomendas colocadas depois do último incidente e ainda pendentes de pagamento. Por
+   exemplo, um cliente que tenha um total de incidentes de 2400€ e tenha feito 3 encomendas depois
+   do último incidente que ainda não pagou tem um fator de risco de 800€ (2400/3)
 
 #### fncUS205CreateUser
 
@@ -930,6 +1313,143 @@ end;
 
 ```sql
 DROP FUNCTION FNCUS205CREATEUSER;
+```
+
+#### fncUS205ClientRiskFactor
+
+This function calculates the risk factor of a certain user. For that, it requires the id of the user; firstly, it finds
+all the orders that are late an
+then calculates the missing amount. Then it counts the number of incidents in the last 365 days and returns the ratio
+between the missing amount and the number
+of incidents in the last 365 days.
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS205ClientRiskFactor(clientId IN CLIENT.ID%TYPE) RETURN NUMERIC AS
+    result     NUMERIC;
+    tmp        NUMERIC;
+    itr        Sys_Refcursor;
+    basketId   BASKET.ID%type;
+    amount     BASKETORDER.QUANTITY%type;
+    incidentsN NUMERIC;
+BEGIN
+    OPEN itr FOR SELECT BASKETORDER.BASKET, BASKETORDER.QUANTITY
+                 FROM BASKETORDER
+                          JOIN CLIENT C2 on C2.ID = BASKETORDER.CLIENT
+                 WHERE ORDERDATE >= LASTINCIDENTDATE;
+    result := 0;
+    LOOP
+        FETCH itr INTO basketId,amount;
+        EXIT WHEN itr%notfound;
+        SELECT sum(P.PRICE)
+        into tmp
+        FROM BASKET
+                 JOIN BASKETPRODUCT B on BASKET.ID = B.BASKET
+                 JOIN PRODUCT P on P.ID = B.PRODUCT;
+
+        result := result + tmp * amount;
+    end loop;
+
+    SELECT count(*)
+    into incidentsN
+    FROM BASKETORDER
+    WHERE PAYED = 'N'
+      AND CLIENT = clientId
+      AND DUEDATE >= SYSDATE - 365;
+    return result / incidentsN;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type)
+    RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result for SELECT * FROM SECTOR WHERE EXPLORATION = explorationId ORDER BY DESIGNATION;
+    return result;
+end;
+```
+
+```sql
+DROP FUNCTION fncUS205ClientRiskFactor;
+```
+
+#### fncUS205CreateClient
+
+<!-- TODO write comment-->
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS205CreateClient(userCallerId IN SYSTEMUSER.ID%type, userEmail IN SYSTEMUSER.EMAIL%type,
+                                                addressOfResidence IN OUT ADDRESS.ZIPCODE%type,
+                                                addressOfDelivery IN OUT ADDRESS.ZIPCODE%type,
+                                                clientName IN CLIENT.NAME%type, clientNIF IN CLIENT.NIF%type,
+                                                userPassword in SYSTEMUSER.PASSWORD%type DEFAULT NULL,
+                                                clientPlafond IN CLIENT.PLAFOND%type DEFAULT 100000,
+                                                clientIncidents IN CLIENT.INCIDENTS%type DEFAULT 0,
+                                                clientLastIncidentDate IN CLIENT.LASTINCIDENTDATE%type,
+                                                clientLastYearOrders IN CLIENT.LASTYEARORDERS%type DEFAULT 0,
+                                                clientLastYearSpent IN CLIENT.LASTYEARSPENT%type DEFAULT 0,
+                                                clientPriority IN CLIENT.PRIORITYLEVEL%type DEFAULT 'B',
+                                                clientLastYearIncidents IN CLIENT.LASTYEARINCIDENTS%type DEFAULT 0) RETURN SYSTEMUSER.ID%type AS
+
+    clientId           SYSTEMUSER.ID%type;
+    tmpDistrict        ADDRESS.DISTRICT%type;
+    idAddressResidence ADDRESS.ID%type;
+    idAddressDelivery  ADDRESS.ID%type;
+    nullEmail          SYSTEMUSER.EMAIL%type;
+    realPassword       SYSTEMUSER.PASSWORD%type;
+BEGIN
+    SAVEPOINT BeforeCall;
+    SELECT EMAIL into nullEmail FROM SYSTEMUSER WHERE EMAIL = userEmail;
+    if (nullEmail is not null) then
+        RAISE_APPLICATION_ERROR(-20001, 'Email already exists in database!');
+    end if;
+
+    if (userPassword IS NULL) then
+        realPassword := 'Qwerty123';
+    else
+        realPassword := userPassword;
+    end if;
+
+    if (COALESCE(addressOfDelivery, addressOfResidence) IS NULL) then
+        RAISE_APPLICATION_ERROR(-20003, 'Zipcodes cannot be null');
+    end if;
+
+    if (addressOfDelivery IS NULL) THEN
+        addressOfDelivery := addressOfResidence;
+    ELSIF (addressOfResidence IS NULL) THEN
+        addressOfResidence := addressOfDelivery;
+    end if;
+
+    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfDelivery FETCH FIRST ROW ONLY;
+
+    if (tmpDistrict IS NULL) then
+        INSERT INTO ADDRESS(zipcode) VALUES (addressOfDelivery) returning ID into idAddressDelivery;
+    end if;
+
+    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfResidence;
+
+    if (tmpDistrict IS NULL) then
+        INSERT INTO ADDRESS(zipcode) VALUES (addressOfResidence) returning ID into idAddressResidence;
+    end if;
+
+    INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (userEmail, realPassword) returning ID INTO clientId;
+    PRCUS000LOG(userCallerId, 'INSERT',
+                'INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (' || userEmail || ',' || userPassword ||
+                ') returning ID INTO clientId');
+
+    INSERT INTO CLIENT(ID, ADDRESS, NAME, NIF, PLAFOND, INCIDENTS, LASTINCIDENTDATE, LASTYEARORDERS, LASTYEARSPENT,
+                       ADDRESSOFDELIVERY, PRIORITYLEVEL, LASTYEARINCIDENTS)
+    VALUES (clientId, idAddressResidence, clientName, clientNIF, clientPlafond, clientIncidents, clientLastIncidentDate,
+            clientLastYearOrders, clientLastYearSpent, idAddressDelivery, clientPriority, clientLastYearIncidents);
+    COMMIT;
+    return clientId;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT BeforeCall;
+        RAISE;
+end;
+```
+
+```sql
+DROP FUNCTION fncUS205CreateClient;
 ```
 
 ### US206
@@ -1107,17 +1627,18 @@ end;
 DROP FUNCTION fncUS207OrderSectorByMaxHarvest;
 ```
 
-####  fncUS207OrderSectorByRentability
+#### fncUS207OrderSectorByRentability
 
 To order the sectors, by harvest, in the most convenient way possible, this function will open a cursor for
 the selection of the sectors from the exploration with *explorationId*, inner joining the sectors with the harvests on
-their sectorId and inner joining, yet again, with the products on productId, grouping the results by sectorDesignation and 
-productPrice, finding the average harvest of said group, multiplying the average amount by the price by unit of each product
+their sectorId and inner joining, yet again, with the products on productId, grouping the results by sectorDesignation
+and
+productPrice, finding the average harvest of said group, multiplying the average amount by the price by unit of each
+product
 ordering such results, depending on the criteria passed as parameter by *orderType*, ascending or descending order.
 
 After having the result, the function returns the cursor containing a list of elements
 with the ```{SECTOR.DESIGNATION%type, NUMERIC}``` profile.
-
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS207OrderSectorByRentability(explorationId IN EXPLORATION.ID%type,
@@ -1149,6 +1670,114 @@ end;
 DROP FUNCTION fncUS207OrderSectorByRentability;
 ```
 
+### US209
+
+#### fncUS209ListOrdersByStatus
+
+````sql
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByStatus(orderStatus BASKETORDER.STATUS%type) RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER WHERE STATUS = orderStatus;
+    return result;
+end;
+````
+
+```sql
+DROP FUNCTION fncUS209ListOrdersByStatus;
+```
+
+#### fncUS209ListOrdersByDateOfOrder
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByDateOfOrder RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY ORDERDATE;
+    return result;
+end;
+```
+
+```sql
+DROP FUNCTION fncUS209ListOrdersByDateOfOrder;
+```
+
+#### fncUS209ListOrdersByClient
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByClient(idClient BASKETORDER.CLIENT%type) RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER WHERE CLIENT = idClient ORDER BY ORDERDATE;
+    return result;
+end;
+```
+
+```sql
+DROP FUNCTION fncUS209ListOrdersByClient;
+```
+
+#### fncUS209ListOrdersById
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersById RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY BASKETORDER.ORDERNUMBER;
+    return result;
+end;
+```
+
+```sql
+DROP FUNCTION fncUS209ListOrdersById;
+```
+
+#### fncUS209ListOrdersByOrderNumber
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByOrderNumber RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY BASKETORDER.ORDERNUMBER;
+    return result;
+end;
+```
+
+```sql
+DROP FUNCTION fncUS209ListOrdersByOrderNumber;
+```
+
+#### fncUS209ListOrdersByPrice
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByPrice RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT CLIENT,
+                           BASKET,
+                           QUANTITY,
+                           DRIVER,
+                           ORDERDATE,
+                           DUEDATE,
+                           DELIVERYDATE,
+                           STATUS,
+                           ADDRESS,
+                           ORDERNUMBER,
+                           (SELECT sum(P.PRICE)
+                            FROM BASKET B
+                                     JOIN BASKETPRODUCT B2 on B.ID = B2.BASKET
+                                     JOIN PRODUCT P on P.ID = B2.PRODUCT
+                            WHERE B.ID = PA.BASKET
+                            GROUP BY P.PRICE) * PA.QUANTITY as PRICE
+                    FROM BASKETORDER PA
+                    ORDER BY PRICE DESC;
+    return result;
+end;
+```
+```sql
+DROP FUNCTION fncUS209ListOrdersByPrice;
+```
+
 ## Triggers
 
 ### trgCreateMeteorologicStation
@@ -1166,9 +1795,11 @@ BEGIN
     INSERT INTO METEOROLOGICSTATION(NAME) VALUES ('Station') returning ID into :new.METEOROLOGICSTATION;
 end;
 ```
+
 ```sql
 DROP TRIGGER trgCreateMeteorologicStation;
 ```
+
 ### trgCreateFieldRecording
 
 This triggers auto creates the field recording of an exploration upon its creation
@@ -1182,9 +1813,11 @@ BEGIN
     INSERT INTO FIELDRECORDING VALUES (:NEW.ID);
 end;
 ```
+
 ```sql
 DROP TRIGGER trgCreateFieldRecording;
 ```
+
 ### trgFindFieldRecording
 
 This triggers guarantees that an harvest is connected to the correct field report
@@ -1203,4 +1836,39 @@ end;
 
 ```sql
 DROP TRIGGER trgFindFieldRecording;
+```
+
+## Views
+
+### ClientView
+
+This view has the objective of presenting all the information about all the clients in a convenient way. To calculate
+the number of orders that
+have been payed by each client, a sub-query that counts every entry on the orders by client, is payed and whose date is
+after 365 days in the past was used.
+To calculate the number of orders still awaiting payment, but delivered, a sub-query that counts every entry on the
+orders by client,
+is not payed and is delivered.
+
+```sql
+CREATE OR REPLACE VIEW ClientView AS
+SELECT ID                                                          AS "Client's ID",
+       NAME                                                        AS "Client's Name",
+       PRIORITYLEVEL                                               AS "Client Level",
+       COALESCE(TO_CHAR(LASTINCIDENTDATE), 'No incidents to date') AS "Reported Incidents",
+       (SELECT count(*)
+        FROM BASKETORDER B
+        WHERE CParent.ID = B.CLIENT
+          AND B.PAYED = 'Y'
+          AND B.ORDERDATE > SYSDATE - 365)                         AS "Number of payed orders",
+       (SELECT count(*)
+        FROM BASKETORDER
+        WHERE CLIENT = CParent.ID
+          AND STATUS = 'DELIVERED'
+          AND PAYED = 'N')                                         AS "Number of orders awaiting payment"
+FROM CLIENT CParent;
+```
+
+```sql
+DROP VIEW CLIENTVIEW;
 ```

@@ -1,5 +1,109 @@
 # Database Physical Structure
 
+## Technology
+
+A database is an organized collection of structured information, or data, typically stored electronically in a computer system.
+A database is usually controlled by a database management system (DBMS). Together, the data and the DBMS, along with the applications 
+that are associated with them, are referred to as a database system, often shortened to just database.
+
+Data within the most common types of databases in operation today is typically modeled in rows and columns in a series of
+tables to make processing and data querying efficient. The data can then be easily accessed, managed, modified, updated, 
+controlled, and organized. Most databases use structured query language (SQL) for writing and querying data.
+Popular examples are:
+* [Oracle XE](https://www.oracle.com/database/technologies/appdev/xe.html)
+* [My SQL](https://www.mysql.com/)
+* [SQL Server](https://www.microsoft.com/pt-br/sql-server/sql-server-downloads)
+* [PostgreSQL](https://www.postgresql.org/)
+
+Nevertheless, there are other types of databases that deviate from such specification, non-relational (or no SQL) databases.
+A NoSQL, or non relational database, allows unstructured and semi structured (making use of schemas) data to be stored and manipulated (in contrast to 
+a relational database, which defines how all data inserted into the database must be composed). NoSQL databases grew popular 
+as web applications became more common and more complex.
+Popular examples are:
+* [Mongo DB](https://www.mongodb.com/)
+* [Apache Cassandra](https://cassandra.apache.org/_/index.html)
+* [Neo4J](https://neo4j.com/)
+* [Redis](https://redis.io/)
+
+[Reference](https://www.oracle.com/pt/database/what-is-database/)
+
+Relational databases work with structured data. They support ACID transactional consistency and provide a flexible way to 
+structure data that is not possible with other database technologies. Key features of relational databases include the 
+ability to make two tables look like one, join multiple tables together on key fields, create complex indexes that perform 
+well and are easy to manage, and maintain data integrity for maximum data accuracy.
+
+The relational database is a system of storing and retrieving data in which the content of the data is stored in tables, 
+rows, columns, or fields. When you have multiple pieces of information that need to be related to one another then it is 
+important to store them in this type of format; otherwise, you would just end up with a bunch of unrelated facts and figures
+without any ties between them.
+
+There are many benefits associated with using a relational database for managing your data needs. For instance, if you want
+to view all the contacts in your phone book (or other types) then all you would need to do is enter one query into the search 
+bar and instantly see every contact listed there. This saves time from having to manually go through.
+
+The relational database benefits are discussed briefly.
+
+1. **Simplicity of Model**
+
+In contrast to other types of database models, the relational database model is much simpler. It does not require any complex queries because it has no query processing or structuring so simple SQL queries are enough to handle the data.
+
+2. **Ease of Use**
+
+Users can easily access/retrieve their required information within seconds without indulging in the complexity of the database. Structured Query Language (SQL) is used to execute complex queries.
+
+3. **Accuracy**
+
+A key feature of relational databases is that they’re strictly defined and well-organized, so data doesn’t get duplicated. Relational databases have accuracy because of their structure with no data duplication.
+
+4.  **Data Integrity**
+
+RDBMS databases are also widely used for data integrity as they provide consistency across all tables. The data integrity ensures the features like accuracy and ease of use.
+
+5. **Normalization**
+As data becomes more and more complex, the need for efficient ways of storing it increases. Normalization is a method that breaks down information into manageable chunks to reduce storage size. Data can be broken up into different levels with any level requiring preparation before moving onto another level of normalizing your data.
+
+Database normalization also ensures that a relational database has no variety or variance in its structure and can be manipulated accurately. This ensures that integrity is maintained when using data from this database for your business decisions.
+
+6. **Collaboration**
+
+Multiple users can access the database to retrieve information at the same time and even if data is being updated.
+
+7. **Security**
+
+Data is secure as Relational Database Management System allows only authorized users to directly access the data. No unauthorized user can access the information.
+
+
+Although there are more benefits of using relational databases, it has some limitations also. Let’s see the limitations or disadvantages of using the relational database.
+
+1. **Maintenance Problem**
+
+The maintenance of the relational database becomes difficult over time due to the increase in the data. Developers and programmers have to spend a lot of time maintaining the database.
+
+2. **Cost**
+
+The relational database system is costly to set up and maintain. The initial cost of the software alone can be quite pricey for smaller businesses, but it gets worse when you factor in hiring a professional technician who must also have expertise with that specific kind of program.
+
+3. **Physical Storage**
+
+A relational database is comprised of rows and columns, which requires a lot of physical memory because each operation performed depends on separate storage. The requirements of physical memory may increase along with the increase of data.
+
+4. **Lack of Scalability**
+
+While using the relational database over multiple servers, its structure changes and becomes difficult to handle, especially when the quantity of the data is large. Due to this, the data is not scalable on different physical storage servers. Ultimately, its performance is affected i.e. lack of availability of data and load time etc. As the database becomes larger or more distributed with a greater number of servers, this will have negative effects like latency and availability issues affecting overall performance.
+
+5. **Complexity in Structure**
+
+Relational databases can only store data in tabular form which makes it difficult to represent complex relationships between objects. This is an issue because many applications require more than one table to store all the necessary data required by their application logic.
+
+6. **Decrease in performance over time**
+
+The relational database can become slower, not just because of its reliance on multiple tables. When there is a large number of tables and data in the system, it causes an increase in complexity. It can lead to slow response times over queries or even complete failure for them depending on how many people are logged into the server at a given time.
+
+[Reference](https://databasetown.com/relational-database-benefits-and-limitations/)
+
+For this project a **Relational Database (SQL Database)** was chosen due to having more upsides than downsides and for the downsides.
+
+
 ## Files to Include
 
 * [CREATE TABLES](./CREATE_TABLES.sql)
@@ -20,12 +124,14 @@ see [this document](./../../conventions/Database%20Naming%20Conventions.md)
 -- TABLES --
 CREATE TABLE Address
 (
-    id number(10),
+    id       number(10) GENERATED BY DEFAULT AS IDENTITY,
+    zipcode  VARCHAR2(255),
+    district VARCHAR2(255) DEFAULT 'PORTO',
     PRIMARY KEY (id)
 );
 CREATE TABLE AuditLog
 (
-    id           number(10),
+    id           number(10) GENERATED BY DEFAULT AS IDENTITY,
     dateOfAction date          NOT NULL,
     userId       number(10)    NOT NULL,
     type         varchar2(255) NOT NULL,
@@ -36,37 +142,55 @@ CREATE TABLE AuditLog
 );
 CREATE TABLE Basket
 (
-    id             number(10),
+    id             number(10) GENERATED BY DEFAULT AS IDENTITY,
     dateOfCreation date       NOT NULL,
     price          number(19) NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE BasketOrder
 (
-    client   number(10) NOT NULL,
-    basket   number(10) NOT NULL,
-    quantity number(10) NOT NULL,
-    driver   number(10) NOT NULL,
+    client       number(10) NOT NULL,
+    basket       number(10) NOT NULL,
+    quantity     number(10) NOT NULL,
+    driver       number(10),
+    orderDate    date          DEFAULT SYSDATE,
+    dueDate      date          DEFAULT SYSDATE + 10,
+    deliveryDate date          DEFAULT SYSDATE + 30,
+    status       VARCHAR2(255) DEFAULT 'REGISTERED',
+    address      number(10) NOT NULL,
+    orderNumber  number(10) GENERATED ALWAYS AS IDENTITY,
+    payed        VARCHAR2(1)   DEFAULT 'N',
     PRIMARY KEY (client,
-                 basket)
+                 basket, orderDate)
 );
 CREATE TABLE BasketProduct
 (
-    basket  number(10) NOT NULL,
-    product number(10) NOT NULL,
+    basket   number(10) NOT NULL,
+    product  number(10) NOT NULL,
+    quantity number(10) DEFAULT 1,
     PRIMARY KEY (basket,
                  product)
 );
 CREATE TABLE Building
 (
-    id          number(10),
+    id          number(10) GENERATED BY DEFAULT AS IDENTITY,
     exploration number(10) NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE Client
 (
-    id      number(10) NOT NULL,
-    address number(10),
+    id                number(10)                 NOT NULL,
+    address           number(10)                 NOT NULL,
+    name              varchar2(255)              NOT NULL,
+    nif               number(10)                 NOT NULL,
+    plafond           number(10)  DEFAULT 100000 NOT NULL,
+    incidents         number(10)  DEFAULT 0      NOT NULL,
+    lastIncidentDate  date,
+    lastYearOrders    number(10)  DEFAULT 0      NOT NULL,
+    lastYearSpent     number(10)  DEFAULT 0      NOT NULL,
+    addressOfDelivery number(10)                 NOT NULL,
+    priorityLevel     varchar2(1) DEFAULT 'B'    NOT NULL,
+    lastYearIncidents number(10)  DEFAULT 0      NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE CropWatering
@@ -98,7 +222,7 @@ CREATE TABLE Driver
 );
 CREATE TABLE Exploration
 (
-    id      number(10),
+    id      number(10) GENERATED BY DEFAULT AS IDENTITY,
     address number(10),
     PRIMARY KEY (id)
 );
@@ -119,7 +243,7 @@ CREATE TABLE FieldRecording
     exploration number(10) NOT NULL,
     PRIMARY KEY (exploration)
 );
-CREATE TABLE FieldRecording_ProductionFactors
+CREATE TABLE ProductionFactorsRecording
 (
     fieldRecording    number(10) NOT NULL,
     productionFactors number(10) NOT NULL,
@@ -165,23 +289,25 @@ CREATE TABLE Product
 (
     name  varchar2(255)           NOT NULL,
     type  varchar2(255)           NOT NULL,
-    id    number(10),
+    id    number(10) GENERATED BY DEFAULT AS IDENTITY,
     price number(10, 2) DEFAULT 0 NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE ProductionEntry
 (
     id    number(10)    NOT NULL,
-    value varchar2(255) NOT NULL,
-    unit  number(10)    NOT NULL,
+    value number(10)    NOT NULL,
+    unit  varchar2(255) NOT NULL,
     type  varchar2(255) NOT NULL,
-    PRIMARY KEY (id)
+    name  varchar2(255) NOT NULL,
+    PRIMARY KEY (id, name)
 );
 CREATE TABLE ProductionFactors
 (
-    id          number(10),
+    id          number(10) GENERATED BY DEFAULT AS IDENTITY,
     name        varchar2(255) NOT NULL,
     formulation varchar2(255) NOT NULL,
+    supplier    varchar2(255) NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE ProductionZones
@@ -191,7 +317,7 @@ CREATE TABLE ProductionZones
 );
 CREATE TABLE Sector
 (
-    id                  number(10),
+    id                  number(10) GENERATED BY DEFAULT AS IDENTITY,
     designation         varchar2(255) NOT NULL,
     area                number(19)    NOT NULL,
     exploration         number(10)    NOT NULL,
@@ -202,7 +328,7 @@ CREATE TABLE Sector
 );
 CREATE TABLE Sensor
 (
-    id      number(10),
+    id      number(10) GENERATED BY DEFAULT AS IDENTITY,
     station number(10) NOT NULL,
     CONSTRAINT id
         PRIMARY KEY (id)
@@ -228,7 +354,7 @@ CREATE TABLE Stable
 );
 CREATE TABLE SystemUser
 (
-    id       number(10),
+    id       number(10) GENERATED BY DEFAULT AS IDENTITY,
     email    varchar2(255) NOT NULL UNIQUE,
     password varchar2(255) NOT NULL,
     PRIMARY KEY (id)
@@ -240,7 +366,7 @@ CREATE TABLE TubularSystem
 );
 CREATE TABLE Valve
 (
-    id            number(10),
+    id            number(10) GENERATED BY DEFAULT AS IDENTITY,
     tubularSystem number(10) NOT NULL,
     PRIMARY KEY (id)
 );
@@ -253,6 +379,8 @@ ALTER TABLE FarmingManager
     ADD CONSTRAINT FKFarmingMan732235 FOREIGN KEY (id) REFERENCES SystemUser (id);
 ALTER TABLE Client
     ADD CONSTRAINT FKClient543685 FOREIGN KEY (id) REFERENCES SystemUser (id);
+ALTER TABLE Client
+    ADD CONSTRAINT FKClient934999 FOREIGN KEY (addressOfDelivery) REFERENCES Address (id);
 ALTER TABLE DistributionManager
     ADD CONSTRAINT FKDistributi353489 FOREIGN KEY (id) REFERENCES SystemUser (id);
 ALTER TABLE Stable
@@ -317,9 +445,9 @@ ALTER TABLE MeteorologicData
     ADD CONSTRAINT FKMeteorolog41417 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
 ALTER TABLE MeteorologicData
     ADD CONSTRAINT FKMeteorolog357263 FOREIGN KEY (station) REFERENCES MeteorologicStation (id);
-ALTER TABLE FieldRecording_ProductionFactors
+ALTER TABLE ProductionFactorsRecording
     ADD CONSTRAINT FKFieldRecor49323 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
-ALTER TABLE FieldRecording_ProductionFactors
+ALTER TABLE ProductionFactorsRecording
     ADD CONSTRAINT FKFieldRecor728316 FOREIGN KEY (productionFactors) REFERENCES ProductionFactors (id);
 ALTER TABLE BasketOrder
     ADD CONSTRAINT FKBasketOrde555898 FOREIGN KEY (driver) REFERENCES Driver (id);
@@ -329,11 +457,14 @@ ALTER TABLE BasketProduct
     ADD CONSTRAINT FKBasketProd544770 FOREIGN KEY (product) REFERENCES Product (id);
 ALTER TABLE AuditLog
     ADD CONSTRAINT FKAuditLog926921 FOREIGN KEY (userId) REFERENCES SystemUser (id);
+ALTER TABLE BasketOrder
+    ADD CONSTRAINT FKBasketOrde901265 FOREIGN KEY (address) REFERENCES Address (id);
 ```
 
 ## Delete Database
 
 ```sql
+--DELETE DATABASE--
 DROP TABLE Address CASCADE CONSTRAINTS PURGE;
 DROP TABLE AuditLog CASCADE CONSTRAINTS PURGE;
 DROP TABLE Basket CASCADE CONSTRAINTS PURGE;
@@ -349,7 +480,7 @@ DROP TABLE Exploration CASCADE CONSTRAINTS PURGE;
 DROP TABLE ExplorationClientele CASCADE CONSTRAINTS PURGE;
 DROP TABLE FarmingManager CASCADE CONSTRAINTS PURGE;
 DROP TABLE FieldRecording CASCADE CONSTRAINTS PURGE;
-DROP TABLE FieldRecording_ProductionFactors CASCADE CONSTRAINTS PURGE;
+DROP TABLE PRODUCTIONFACTORSRECORDING CASCADE CONSTRAINTS PURGE;
 DROP TABLE Harvest CASCADE CONSTRAINTS PURGE;
 DROP TABLE Hub CASCADE CONSTRAINTS PURGE;
 DROP TABLE MachineryGarage CASCADE CONSTRAINTS PURGE;
