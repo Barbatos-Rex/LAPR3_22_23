@@ -224,3 +224,62 @@ BEGIN
     end if;
     return result;
 end;
+
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByStatus(orderStatus BASKETORDER.STATUS%type) RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER WHERE STATUS = orderStatus;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByDateOfOrder RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY ORDERDATE;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByClient(idClient BASKETORDER.CLIENT%type) RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER WHERE CLIENT = idClient ORDER BY ORDERDATE;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersById RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY BASKETORDER.ORDERNUMBER;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByOrderNumber RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY BASKETORDER.ORDERNUMBER;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByPrice RETURN SYS_REFCURSOR AS
+    result Sys_Refcursor;
+BEGIN
+    OPEN result FOR SELECT CLIENT,
+                           BASKET,
+                           QUANTITY,
+                           DRIVER,
+                           ORDERDATE,
+                           DUEDATE,
+                           DELIVERYDATE,
+                           STATUS,
+                           ADDRESS,
+                           ORDERNUMBER,
+                           (SELECT sum(P.PRICE)
+                            FROM BASKET B
+                                     JOIN BASKETPRODUCT B2 on B.ID = B2.BASKET
+                                     JOIN PRODUCT P on P.ID = B2.PRODUCT
+                            WHERE B.ID = PA.BASKET
+                            GROUP BY P.PRICE) * PA.QUANTITY as PRICE
+                    FROM BASKETORDER PA
+                    ORDER BY PRICE DESC;
+    return result;
+end;

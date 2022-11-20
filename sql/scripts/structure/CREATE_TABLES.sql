@@ -26,19 +26,25 @@ CREATE TABLE Basket
 );
 CREATE TABLE BasketOrder
 (
-    client    number(10) NOT NULL,
-    basket    number(10) NOT NULL,
-    quantity  number(10) NOT NULL,
-    driver    number(10) NOT NULL,
-    orderDate date DEFAULT SYSDATE,
-    dueDate   date DEFAULT SYSDATE + 10,
+    client       number(10) NOT NULL,
+    basket       number(10) NOT NULL,
+    quantity     number(10) NOT NULL,
+    driver       number(10),
+    orderDate    date          DEFAULT SYSDATE,
+    dueDate      date          DEFAULT SYSDATE + 10,
+    deliveryDate date          DEFAULT SYSDATE + 30,
+    status       VARCHAR2(255) DEFAULT 'REGISTERED',
+    address      number(10) NOT NULL,
+    orderNumber  number(10) GENERATED ALWAYS AS IDENTITY,
+    payed        VARCHAR2(1)   DEFAULT 'N',
     PRIMARY KEY (client,
                  basket, orderDate)
 );
 CREATE TABLE BasketProduct
 (
-    basket  number(10) NOT NULL,
-    product number(10) NOT NULL,
+    basket   number(10) NOT NULL,
+    product  number(10) NOT NULL,
+    quantity number(10) DEFAULT 1,
     PRIMARY KEY (basket,
                  product)
 );
@@ -328,3 +334,5 @@ ALTER TABLE BasketProduct
     ADD CONSTRAINT FKBasketProd544770 FOREIGN KEY (product) REFERENCES Product (id);
 ALTER TABLE AuditLog
     ADD CONSTRAINT FKAuditLog926921 FOREIGN KEY (userId) REFERENCES SystemUser (id);
+ALTER TABLE BasketOrder
+    ADD CONSTRAINT FKBasketOrde901265 FOREIGN KEY (address) REFERENCES Address (id);

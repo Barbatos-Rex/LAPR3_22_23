@@ -1,3 +1,28 @@
+CREATE OR REPLACE PROCEDURE prcUS205AlterClientLastYearInfo(clientId IN SYSTEMUSER.ID%type,
+                                                            numberOfOrders IN CLIENT.LASTYEARORDERS%type DEFAULT NULL,
+                                                            spentOnOrders IN CLIENT.LASTYEARSPENT%type DEFAULT NULL) as
+
+
+    newOrders CLIENT.LASTYEARORDERS%type;
+    newSpent  CLIENT.LASTYEARSPENT%type;
+BEGIN
+
+    SELECT LASTYEARORDERS, LASTYEARSPENT INTO newOrders,newSpent FROM CLIENT WHERE ID = clientId;
+
+    if (numberOfOrders IS NOT NULL) THEN
+        newOrders := numberOfOrders;
+    end if;
+
+    if (spentOnOrders IS NOT NULL) THEN
+        newSpent := spentOnOrders;
+    end if;
+
+
+    UPDATE CLIENT SET LASTYEARORDERS = newOrders, LASTYEARSPENT = newSpent WHERE CLIENT.ID = clientId;
+end;
+
+
+
 CREATE OR REPLACE PROCEDURE prcUS206CreateSector(userCallerId IN SYSTEMUSER.ID%type,
                                                  designationParam IN Sector.DESIGNATION%type,
                                                  areaParam IN SECTOR.AREA%type,
@@ -82,3 +107,56 @@ CREATE OR REPLACE PROCEDURE prcUS000LOG(callerId IN SYSTEMUSER.ID%type, logType 
 BEGIN
     INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND) VALUES (sysdate, callerId, logType, logCommand);
 end;
+
+CREATE OR REPLACE PROCEDURE prcUS209OrderBasket(clientId IN SYSTEMUSER.ID%type, basketId IN BASKETORDER.BASKET%type,
+                                                numberOfBaskets IN BASKETORDER.QUANTITY%type,
+                                                orderDueDate IN BASKETORDER.DUEDATE%type DEFAULT SYSDATE + 10,
+                                                deliveryAddress IN BASKETORDER.ADDRESS%type DEFAULT NULL,
+                                                orderDeliveryDate IN BASKETORDER.DELIVERYDATE%type DEFAULT SYSDATE + 30) AS
+
+    unpaidValue   NUMERIC;
+    basketPrice   NUMERIC;
+    orderPrice    NUMERIC;
+    clientPlafond NUMERIC;
+BEGIN
+
+    SELECT (SELECT sum(P.PRICE)
+            FROM BASKET
+                     JOIN BASKETPRODUCT B on BASKET.ID = B.BASKET
+                     JOIN PRODUCT P on P.ID = B.PRODUCT
+            WHERE BASKET.ID = PARENT.BASKET) * PARENT.QUANTITY
+    into unpaidValue
+    FROM BASKETORDER PARENT
+    WHERE CLIENT = clientId
+      AND STATUS = 'REGISTERED';
+
+    SELECT sum(P.PRICE)
+    into basketPrice
+    FROM BASKETPRODUCT B
+             JOIN PRODUCT P on P.ID = B.PRODUCT
+    WHERE B.BASKET = basketId;
+
+    orderPrice := basketPrice * numberOfBaskets;
+    SELECT PLAFOND into clientPlafond from CLIENT where ID = clientId;
+
+    if (clientPlafond < orderPrice + unpaidValue) then
+        raise_application_error(-20005, 'Order exceeds client plafond limit!');
+    end if;
+
+    INSERT INTO BASKETORDER(CLIENT, BASKET, QUANTITY, DUEDATE, DELIVERYDATE, ADDRESS)
+    VALUES (clientId, basketId, numberOfBaskets, orderDueDate, orderDeliveryDate, deliveryAddress);
+
+end;
+
+CREATE OR REPLACE VIEW ClientView AS
+SELECT ID                                                                              AS "Client's ID",NAME AS "Client's Name",PRIORITYLEVEL AS "Client Level",
+       LASTYEARINCIDENTS                                                               AS "Reported Incidents",
+       (SELECT count(*)
+        FROM BASKETORDER B
+        WHERE CParent.ID = B.CLIENT AND B.PAYED = 'Y' AND B.ORDERDATE > SYSDATE - 365) AS "Number of payed orders",
+       (SELECT count(*)
+        FROM BASKETORDER
+        WHERE CLIENT = CParent.ID
+          AND STATUS = 'DELIVERED'
+          AND PAYED = 'N')                                                             AS "Number of orders awaiting payment"
+FROM CLIENT CParent;
