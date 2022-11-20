@@ -76,3 +76,9 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Could add the entry for the product');
         ROLLBACK TO SAVEPOINT BeforeCall;
 end;
+
+CREATE OR REPLACE PROCEDURE prcUS000LOG(callerId IN SYSTEMUSER.ID%type, logType IN AUDITLOG.TYPE%type,
+                                        logCommand IN AUDITLOG.COMMAND%type) AS
+BEGIN
+    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND) VALUES (sysdate, callerId, logType, logCommand);
+end;

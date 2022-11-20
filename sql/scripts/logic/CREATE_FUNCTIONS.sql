@@ -1,3 +1,4 @@
+--DEPRECATED FOR CLIENTS--
 CREATE OR REPLACE FUNCTION fncUS205CreateUser(userCallerId IN SYSTEMUSER.ID%type, userType IN VARCHAR2,
                                               userEmail IN SYSTEMUSER.EMAIL%TYPE,
                                               userPassword IN SYSTEMUSER.PASSWORD%TYPE) RETURN SYSTEMUSER.ID%TYPE AS
@@ -34,7 +35,7 @@ BEGIN
         VALUES (sysdate, userCallerId, 'INSERT', 'INSERT INTO DISTRIBUTIONMANAGER(ID) VALUES (' || userId || ');');
     else
         ROLLBACK;
-        RAISE_APPLICATION_ERROR(-20001,
+        RAISE_APPLICATION_ERROR(-20002,
                                 'User type is incorrect! It should be one of the following: [client,driver,farm,distribution]');
     end if;
     COMMIT;
@@ -46,8 +47,79 @@ EXCEPTION
         RAISE;
 end;
 
+CREATE OR REPLACE FUNCTION fncUS205CreateClient(userCallerId IN SYSTEMUSER.ID%type, userEmail IN SYSTEMUSER.EMAIL%type,
+                                                addressOfResidence IN OUT ADDRESS.ZIPCODE%type,
+                                                addressOfDelivery IN OUT ADDRESS.ZIPCODE%type,
+                                                clientName IN CLIENT.NAME%type, clientNIF IN CLIENT.NIF%type,
+                                                userPassword in SYSTEMUSER.PASSWORD%type DEFAULT NULL,
+                                                clientPlafond IN CLIENT.PLAFOND%type DEFAULT 100000,
+                                                clientIncidents IN CLIENT.INCIDENTS%type DEFAULT 0,
+                                                clientLastIncidentDate IN CLIENT.LASTINCIDENTDATE%type,
+                                                clientLastYearOrders IN CLIENT.LASTYEARORDERS%type DEFAULT 0,
+                                                clientLastYearSpent IN CLIENT.LASTYEARSPENT%type DEFAULT 0,
+                                                clientPriority IN CLIENT.PRIORITYLEVEL%type DEFAULT 'B',
+                                                clientLastYearIncidents IN CLIENT.LASTYEARINCIDENTS%type DEFAULT 0) RETURN SYSTEMUSER.ID%type AS
 
-CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type) RETURN SYS_REFCURSOR AS
+    clientId           SYSTEMUSER.ID%type;
+    tmpDistrict        ADDRESS.DISTRICT%type;
+    idAddressResidence ADDRESS.ID%type;
+    idAddressDelivery  ADDRESS.ID%type;
+    nullEmail          SYSTEMUSER.EMAIL%type;
+    realPassword       SYSTEMUSER.PASSWORD%type;
+BEGIN
+    SAVEPOINT BeforeCall;
+    SELECT EMAIL into nullEmail FROM SYSTEMUSER WHERE EMAIL = userEmail;
+    if (nullEmail is not null) then
+        RAISE_APPLICATION_ERROR(-20001, 'Email already exists in database!');
+    end if;
+
+    if (userPassword IS NULL) then
+        realPassword := 'Qwerty123';
+    else
+        realPassword := userPassword;
+    end if;
+
+    if (COALESCE(addressOfDelivery, addressOfResidence) IS NULL) then
+        RAISE_APPLICATION_ERROR(-20003, 'Zipcodes cannot be null');
+    end if;
+
+    if (addressOfDelivery IS NULL) THEN
+        addressOfDelivery := addressOfResidence;
+    ELSIF (addressOfResidence IS NULL) THEN
+        addressOfResidence := addressOfDelivery;
+    end if;
+
+    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfDelivery;
+
+    if (tmpDistrict IS NULL) then
+        INSERT INTO ADDRESS(zipcode) VALUES (addressOfDelivery) returning ID into idAddressDelivery;
+    end if;
+
+    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfResidence;
+
+    if (tmpDistrict IS NULL) then
+        INSERT INTO ADDRESS(zipcode) VALUES (addressOfResidence) returning ID into idAddressResidence;
+    end if;
+
+    INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (userEmail, realPassword) returning ID INTO clientId;
+    PRCUS000LOG(userCallerId, 'INSERT',
+                'INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (' || userEmail || ',' || userPassword ||
+                ') returning ID INTO clientId');
+
+    INSERT INTO CLIENT(ID, ADDRESS, NAME, NIF, PLAFOND, INCIDENTS, LASTINCIDENTDATE, LASTYEARORDERS, LASTYEARSPENT,
+                       ADDRESSOFDELIVERY, PRIORITYLEVEL, LASTYEARINCIDENTS)
+    VALUES (clientId, idAddressResidence, clientName, clientNIF, clientPlafond, clientIncidents, clientLastIncidentDate,
+            clientLastYearOrders, clientLastYearSpent, idAddressDelivery, clientPriority, clientLastYearIncidents);
+    COMMIT;
+    return clientId;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT BeforeCall;
+        RAISE;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type)
+    RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
     OPEN result for SELECT * FROM SECTOR WHERE EXPLORATION = explorationId ORDER BY DESIGNATION;
@@ -55,7 +127,8 @@ BEGIN
 end;
 
 CREATE OR REPLACE FUNCTION fncUS206OrderSectorBySize(explorationId IN EXPLORATION.ID%type,
-                                                     orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
+                                                     orderType IN VARCHAR2 DEFAULT 'ASC')
+    RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
     if (orderType = 'DESC') then
@@ -67,7 +140,8 @@ BEGIN
 end;
 
 CREATE OR REPLACE FUNCTION fncUS206OrderSectorByCrop(explorationId IN EXPLORATION.ID%type, arg IN VARCHAR2,
-                                                     orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
+                                                     orderType IN VARCHAR2 DEFAULT 'ASC')
+    RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
     if (arg = 'TYPE') then
@@ -104,7 +178,8 @@ BEGIN
 end;
 
 CREATE OR REPLACE FUNCTION fncUS207OrderSectorByMaxHarvest(explorationId IN EXPLORATION.ID%type,
-                                                           orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
+                                                           orderType IN VARCHAR2 DEFAULT 'ASC')
+    RETURN SYS_REFCURSOR AS
     result SYS_REFCURSOR;
 BEGIN
     if (orderType = 'DESC') then
@@ -126,7 +201,8 @@ BEGIN
 end;
 
 CREATE OR REPLACE FUNCTION fncUS207OrderSectorByRentability(explorationId IN EXPLORATION.ID%type,
-                                                            orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR as
+                                                            orderType IN VARCHAR2 DEFAULT 'ASC')
+    RETURN SYS_REFCURSOR as
     result Sys_Refcursor;
 BEGIN
     IF (orderType = 'DESC') then
