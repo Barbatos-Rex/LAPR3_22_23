@@ -118,6 +118,39 @@ EXCEPTION
         RAISE;
 end;
 
+
+CREATE OR REPLACE FUNCTION fncUS205ClientRiskFactor(clientId IN CLIENT.ID%TYPE) RETURN NUMERIC AS
+    result     NUMERIC;
+    tmp        NUMERIC;
+    itr        Sys_Refcursor;
+    basketId   BASKET.ID%type;
+    amount     BASKETORDER.QUANTITY%type;
+    incidentsN NUMERIC;
+BEGIN
+    OPEN itr FOR SELECT BASKETORDER.BASKET, BASKETORDER.QUANTITY
+                 FROM BASKETORDER
+                          JOIN CLIENT C2 on C2.ID = BASKETORDER.CLIENT
+                 WHERE ORDERDATE >= LASTINCIDENTDATE;
+    result := 0;
+    LOOP
+        FETCH itr INTO basketId,amount;
+        EXIT WHEN itr%notfound;
+        SELECT sum(P.PRICE)
+        into tmp
+        FROM BASKET
+                 JOIN BASKETPRODUCT B on BASKET.ID = B.BASKET
+                 JOIN PRODUCT P on P.ID = B.PRODUCT;
+
+        result := result + tmp * amount;
+    end loop;
+
+    SELECT count(*)
+    into incidentsN
+    FROM BASKETORDER
+    WHERE PAYED = 'N' AND CLIENT = clientId AND DUEDATE >= SYSDATE - 365;
+    return result / incidentsN;
+end;
+
 CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type)
     RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
