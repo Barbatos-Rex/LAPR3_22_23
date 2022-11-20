@@ -89,7 +89,7 @@ BEGIN
         addressOfResidence := addressOfDelivery;
     end if;
 
-    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfDelivery;
+    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfDelivery FETCH FIRST ROW ONLY;
 
     if (tmpDistrict IS NULL) then
         INSERT INTO ADDRESS(zipcode) VALUES (addressOfDelivery) returning ID into idAddressDelivery;
