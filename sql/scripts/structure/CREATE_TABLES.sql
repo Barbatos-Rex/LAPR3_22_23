@@ -59,14 +59,14 @@ CREATE TABLE Client
     id                number(10)                 NOT NULL,
     address           number(10)                 NOT NULL,
     name              varchar2(255)              NOT NULL,
-    nif               number(9)                  NOT NULL CHECK ( REGEXP_LIKE('^[1-4]\d{8}') ),
+    nif               number(9)                  NOT NULL CHECK ( REGEXP_LIKE(nif, '^[1-4]\d{8}') ),
     plafond           number(10)  DEFAULT 100000 NOT NULL CHECK ( plafond >= 0 ),
     incidents         number(10)  DEFAULT 0      NOT NULL CHECK ( incidents >= 0 ),
     lastIncidentDate  date        DEFAULT SYSDATE,
     lastYearOrders    number(10)  DEFAULT 0      NOT NULL CHECK ( lastYearOrders >= 0 ),
     lastYearSpent     number(10)  DEFAULT 0      NOT NULL CHECK ( lastYearSpent >= 0 ),
     addressOfDelivery number(10)                 NOT NULL,
-    priorityLevel     varchar2(1) DEFAULT 'B'    NOT NULL CHECK ( REGEXP_LIKE('[ABC]') ),
+    priorityLevel     varchar2(1) DEFAULT 'B'    NOT NULL CHECK ( REGEXP_LIKE(priorityLevel, '[ABC]') ),
     lastYearIncidents number(10)  DEFAULT 0      NOT NULL CHECK ( lastYearIncidents >= 0 ),
     PRIMARY KEY (id)
 );
