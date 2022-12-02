@@ -48,8 +48,8 @@ EXCEPTION
 end;
 
 CREATE OR REPLACE FUNCTION fncUS205CreateClient(userCallerId IN SYSTEMUSER.ID%type, userEmail IN SYSTEMUSER.EMAIL%type,
-                                                addressOfResidence IN OUT ADDRESS.ZIPCODE%type,
-                                                addressOfDelivery IN OUT ADDRESS.ZIPCODE%type,
+                                                addressOfResidence IN ADDRESS.ZIPCODE%type,
+                                                addressOfDelivery IN ADDRESS.ZIPCODE%type,
                                                 clientName IN CLIENT.NAME%type, clientNIF IN CLIENT.NIF%type,
                                                 userPassword in SYSTEMUSER.PASSWORD%type DEFAULT NULL,
                                                 clientPlafond IN CLIENT.PLAFOND%type DEFAULT 100000,
@@ -64,14 +64,10 @@ CREATE OR REPLACE FUNCTION fncUS205CreateClient(userCallerId IN SYSTEMUSER.ID%ty
     tmpDistrict        ADDRESS.DISTRICT%type;
     idAddressResidence ADDRESS.ID%type;
     idAddressDelivery  ADDRESS.ID%type;
-    nullEmail          SYSTEMUSER.EMAIL%type;
     realPassword       SYSTEMUSER.PASSWORD%type;
+    resAddr            ADDRESS.ZIPCODE%type;
+    devAddr            ADDRESS.ZIPCODE%type;
 BEGIN
-    SAVEPOINT BeforeCall;
-    SELECT EMAIL into nullEmail FROM SYSTEMUSER WHERE EMAIL = userEmail;
-    if (nullEmail is not null) then
-        RAISE_APPLICATION_ERROR(-20001, 'Email already exists in database!');
-    end if;
 
     if (userPassword IS NULL) then
         realPassword := 'Qwerty123';
@@ -82,25 +78,15 @@ BEGIN
     if (COALESCE(addressOfDelivery, addressOfResidence) IS NULL) then
         RAISE_APPLICATION_ERROR(-20003, 'Zipcodes cannot be null');
     end if;
-
+    devAddr := addressOfDelivery;
+    resAddr := addressOfResidence;
     if (addressOfDelivery IS NULL) THEN
-        addressOfDelivery := addressOfResidence;
+        devAddr := addressOfResidence;
     ELSIF (addressOfResidence IS NULL) THEN
-        addressOfResidence := addressOfDelivery;
+        resAddr := addressOfDelivery;
     end if;
-
-    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfDelivery FETCH FIRST ROW ONLY;
-
-    if (tmpDistrict IS NULL) then
-        INSERT INTO ADDRESS(zipcode) VALUES (addressOfDelivery) returning ID into idAddressDelivery;
-    end if;
-
-    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfResidence;
-
-    if (tmpDistrict IS NULL) then
-        INSERT INTO ADDRESS(zipcode) VALUES (addressOfResidence) returning ID into idAddressResidence;
-    end if;
-
+    INSERT INTO ADDRESS(zipcode) VALUES (devAddr) returning ID into idAddressDelivery;
+    INSERT INTO ADDRESS(zipcode) VALUES (resAddr) returning ID into idAddressResidence;
     INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (userEmail, realPassword) returning ID INTO clientId;
     PRCUS000LOG(userCallerId, 'INSERT',
                 'INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (' || userEmail || ',' || userPassword ||
@@ -110,11 +96,12 @@ BEGIN
                        ADDRESSOFDELIVERY, PRIORITYLEVEL, LASTYEARINCIDENTS)
     VALUES (clientId, idAddressResidence, clientName, clientNIF, clientPlafond, clientIncidents, clientLastIncidentDate,
             clientLastYearOrders, clientLastYearSpent, idAddressDelivery, clientPriority, clientLastYearIncidents);
-    COMMIT;
     return clientId;
 EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Email already exists in database!');
+        return null;
     WHEN OTHERS THEN
-        ROLLBACK TO SAVEPOINT BeforeCall;
         RAISE;
 end;
 
@@ -147,7 +134,9 @@ BEGIN
     SELECT count(*)
     into incidentsN
     FROM BASKETORDER
-    WHERE PAYED = 'N' AND CLIENT = clientId AND DUEDATE >= SYSDATE - 365;
+    WHERE PAYED = 'N'
+      AND CLIENT = clientId
+      AND DUEDATE >= SYSDATE - 365;
     return result / incidentsN;
 end;
 
