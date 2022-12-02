@@ -97,9 +97,9 @@ Note: The SQL syntax is case insensitive, so for everything that is related to C
 |            **Valve**            |                                              Component of a tubular system that controls the flow of water                                              |
 
 ## Conceptual Model
-
+![Conceptual](./docs/conceptual/Conceptual_Model.svg)
 ## Logical Model
-![MER](docs/logical.svg)
+![MER](./docs/logical.svg)
 
 # Scripts
 
