@@ -31,18 +31,10 @@ CREATE OR REPLACE PROCEDURE prcUS206CreateSector(userCallerId IN SYSTEMUSER.ID%t
 begin
     SAVEPOINT BeforeCall;
     INSERT INTO SECTOR(DESIGNATION, AREA, EXPLORATION, CULTUREPLAN, PRODUCT)
-    VALUES (designationParam, areaParam, explorationId, 0, productId);
+    VALUES (designationParam, areaParam, explorationId, 0, productId) RETURNING ID INTO sectorId;
     INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
     VALUES (sysdate, userCallerId, 'INSERT', 'INSERT INTO SECTOR(DESIGNATION, AREA, EXPLORATION, CULTUREPLAN, PRODUCT)
     VALUES (designationParam, areaParam, explorationId, 0, productId);');
-
-    SELECT ID
-    into sectorId
-    FROM SECTOR
-    WHERE DESIGNATION = designationParam
-      AND PRODUCT = productId
-      AND EXPLORATION = explorationId
-    ORDER BY ID DESC FETCH FIRST ROW ONLY;
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('Added sector to database');
 EXCEPTION
