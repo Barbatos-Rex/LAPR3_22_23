@@ -391,7 +391,9 @@ DROP FUNCTION fncUS205ClientRiskFactor;
 
 #### fncUS205CreateClient
 
-<!-- TODO write comment-->
+This function will create a client in the database. For that, the function will receive all the necessary information for validating if the password is not null
+and if it is, will use the default one, verify if both addresses are null, if no more that one is null, the function will override the null one with
+the value of the not null, then, finally, will create the user and the client taking into account all the information, logging any database alteration.
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS205CreateClient(userCallerId IN SYSTEMUSER.ID%type, userEmail IN SYSTEMUSER.EMAIL%type,
@@ -682,12 +684,13 @@ DROP FUNCTION fncUS207OrderSectorByRentability;
 ### US209
 
 #### fncUS209ListOrdersByStatus
-
+This function will simply return a cursor with the result of all the orders
+with a certain status
 ````sql
-CREATE OR REPLACE FUNCTION fncUS209ListOrdersByDateOfOrder RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByStatus(orderStatus BASKETORDER.STATUS%type) RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
-    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY ORDERDATE;
+    OPEN result FOR SELECT * FROM BASKETORDER WHERE STATUS = orderStatus;
     return result;
 end;
 ````
@@ -697,12 +700,13 @@ DROP FUNCTION fncUS209ListOrdersByStatus;
 ```
 
 #### fncUS209ListOrdersByDateOfOrder
-
+This function will simply return a cursor with the result of all the orders
+sorted by order by their ordering date
 ```sql
-CREATE OR REPLACE FUNCTION fncUS209ListOrdersByClient(idClient BASKETORDER.CLIENT%type) RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByDateOfOrder RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
-    OPEN result FOR SELECT * FROM BASKETORDER WHERE CLIENT = idClient ORDER BY ORDERDATE;
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY ORDERDATE;
     return result;
 end;
 ```
@@ -712,7 +716,8 @@ DROP FUNCTION fncUS209ListOrdersByDateOfOrder;
 ```
 
 #### fncUS209ListOrdersByClient
-
+This function will simply return a cursor with the result of all the orders of a certain client
+sorted by order by their ordering date
 ```sql
 CREATE OR REPLACE FUNCTION fncUS209ListOrdersByClient(idClient BASKETORDER.CLIENT%type) RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
@@ -727,6 +732,8 @@ DROP FUNCTION fncUS209ListOrdersByClient;
 ```
 
 #### fncUS209ListOrdersById
+This function will simply return a cursor with the result of all the orders 
+sorted by order by their number
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS209ListOrdersById RETURN SYS_REFCURSOR AS
@@ -743,6 +750,9 @@ DROP FUNCTION fncUS209ListOrdersById;
 
 #### fncUS209ListOrdersByOrderNumber
 
+This function will simply return a cursor with the result of all the orders 
+sorted by order number
+
 ```sql
 CREATE OR REPLACE FUNCTION fncUS209ListOrdersByOrderNumber RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
@@ -757,6 +767,10 @@ DROP FUNCTION fncUS209ListOrdersByOrderNumber;
 ```
 
 #### fncUS209ListOrdersByPrice
+
+This function will list all orders by their price. For that, it is necessary to
+join the table of orders with the table of baskets to obtain the price of the basket, multiplying by
+the number of ordered baskets.
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS209ListOrdersByPrice RETURN SYS_REFCURSOR AS

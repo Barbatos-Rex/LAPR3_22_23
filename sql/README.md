@@ -214,9 +214,9 @@ For this project a **Relational Database (SQL Database)** was chosen due to havi
 
 ## Files to Include
 
-* [CREATE TABLES](./CREATE_TABLES.sql)
-* [INITIAL BOOT](./INITIAL_BOOT.sql)
-* [DELETE DATABASE](./DELETE_DATABASE.sql)
+* [CREATE TABLES](./scripts/structure/CREATE_TABLES.sql)
+* [INITIAL BOOT](./scripts/structure/INITIAL_BOOT.sql)
+* [DELETE DATABASE](./scripts/structure/DELETE_DATABASE.sql)
 
 <!--* [CLEAR DATABASE](./CLEAR_DATABASE.sql)  Will be DEPRECATED-->
 
@@ -224,7 +224,7 @@ The database that will be used in this project will
 be [Oracle 18c](https://docs.oracle.com/en/database/oracle/oracle-database/18/)
 
 For clarification on the naming conventions used on this database
-see [this document](./../../conventions/Database%20Naming%20Conventions.md)
+see [this document](./conventions/Database%20Naming%20Conventions.md)
 
 ## Table Creation and Alters
 
@@ -1322,14 +1322,14 @@ END;
 
 ## Files to Include
 
-* [CREATE PROCEDURES](./CREATE_PROCEDURES.sql)
-* [DELETE PROCEDURES](./DELETE_PROCEDURES.sql)
-* [CREATE FUNCTIONS](./CREATE_FUNCTIONS.sql)
-* [DELETE FUNCTIONS](./DELETE_FUNCTIONS.sql)
-* [CREATE TRIGGERS](./CREATE_TRIGGERS.sql)
-* [DELETE TRIGGERS](./DELETE_TRIGGERS.sql)
-* [CREATE VIEWS](./CREATE_VIEWS.sql)
-* [DELETE VIEWS](./DELETE_VIEWS.sql)
+* [CREATE PROCEDURES](./scripts/logic/CREATE_PROCEDURES.sql)
+* [DELETE PROCEDURES](./scripts/logic/DELETE_PROCEDURES.sql)
+* [CREATE FUNCTIONS](./scripts/logic/CREATE_FUNCTIONS.sql)
+* [DELETE FUNCTIONS](./scripts/logic/DELETE_FUNCTIONS.sql)
+* [CREATE TRIGGERS](./scripts/logic/CREATE_TRIGGERS.sql)
+* [DELETE TRIGGERS](./scripts/logic/DELETE_TRIGGERS.sql)
+* [CREATE VIEWS](./scripts/logic/CREATE_VIEWS.sql)
+* [DELETE VIEWS](./scripts/logic/DELETE_VIEWS.sql)
 
 ## Procedures
 
@@ -1711,7 +1711,9 @@ DROP FUNCTION fncUS205ClientRiskFactor;
 
 #### fncUS205CreateClient
 
-<!-- TODO write comment-->
+This function will create a client in the database. For that, the function will receive all the necessary information for validating if the password is not null
+and if it is, will use the default one, verify if both addresses are null, if no more that one is null, the function will override the null one with
+the value of the not null, then, finally, will create the user and the client taking into account all the information, logging any database alteration.
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS205CreateClient(userCallerId IN SYSTEMUSER.ID%type, userEmail IN SYSTEMUSER.EMAIL%type,
@@ -2002,12 +2004,13 @@ DROP FUNCTION fncUS207OrderSectorByRentability;
 ### US209
 
 #### fncUS209ListOrdersByStatus
-
+This function will simply return a cursor with the result of all the orders
+with a certain status
 ````sql
-CREATE OR REPLACE FUNCTION fncUS209ListOrdersByDateOfOrder RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByStatus(orderStatus BASKETORDER.STATUS%type) RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
-    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY ORDERDATE;
+    OPEN result FOR SELECT * FROM BASKETORDER WHERE STATUS = orderStatus;
     return result;
 end;
 ````
@@ -2017,12 +2020,13 @@ DROP FUNCTION fncUS209ListOrdersByStatus;
 ```
 
 #### fncUS209ListOrdersByDateOfOrder
-
+This function will simply return a cursor with the result of all the orders
+sorted by order by their ordering date
 ```sql
-CREATE OR REPLACE FUNCTION fncUS209ListOrdersByClient(idClient BASKETORDER.CLIENT%type) RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByDateOfOrder RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
-    OPEN result FOR SELECT * FROM BASKETORDER WHERE CLIENT = idClient ORDER BY ORDERDATE;
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY ORDERDATE;
     return result;
 end;
 ```
@@ -2032,7 +2036,8 @@ DROP FUNCTION fncUS209ListOrdersByDateOfOrder;
 ```
 
 #### fncUS209ListOrdersByClient
-
+This function will simply return a cursor with the result of all the orders of a certain client
+sorted by order by their ordering date
 ```sql
 CREATE OR REPLACE FUNCTION fncUS209ListOrdersByClient(idClient BASKETORDER.CLIENT%type) RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
@@ -2047,6 +2052,8 @@ DROP FUNCTION fncUS209ListOrdersByClient;
 ```
 
 #### fncUS209ListOrdersById
+This function will simply return a cursor with the result of all the orders 
+sorted by order by their number
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS209ListOrdersById RETURN SYS_REFCURSOR AS
@@ -2063,6 +2070,9 @@ DROP FUNCTION fncUS209ListOrdersById;
 
 #### fncUS209ListOrdersByOrderNumber
 
+This function will simply return a cursor with the result of all the orders 
+sorted by order number
+
 ```sql
 CREATE OR REPLACE FUNCTION fncUS209ListOrdersByOrderNumber RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
@@ -2077,6 +2087,10 @@ DROP FUNCTION fncUS209ListOrdersByOrderNumber;
 ```
 
 #### fncUS209ListOrdersByPrice
+
+This function will list all orders by their price. For that, it is necessary to
+join the table of orders with the table of baskets to obtain the price of the basket, multiplying by
+the number of ordered baskets.
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS209ListOrdersByPrice RETURN SYS_REFCURSOR AS
