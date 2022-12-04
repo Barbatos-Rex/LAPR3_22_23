@@ -111,7 +111,9 @@ DECLARE
     val NUMBER;
 BEGIN
     DBMS_OUTPUT.PUT_LINE('Data Report:');
-    FOR I IN (SELECT TABLE_NAME FROM USER_TABLES)
+    DBMS_OUTPUT.PUT_LINE('Table ==> Number of Entries');
+    DBMS_OUTPUT.PUT_LINE('===========================');
+    FOR I IN (SELECT TABLE_NAME FROM USER_TABLES ORDER BY TABLE_NAME)
         LOOP
             EXECUTE IMMEDIATE 'SELECT count(*) FROM ' || i.table_name INTO val;
             DBMS_OUTPUT.PUT_LINE(i.table_name || ' ==> ' || val);

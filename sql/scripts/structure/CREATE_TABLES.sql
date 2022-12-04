@@ -251,88 +251,88 @@ CREATE TABLE Valve
 -- Alter --
 
 ALTER TABLE Driver
-    ADD CONSTRAINT FKDriver730052 FOREIGN KEY (id) REFERENCES SystemUser (id);
+    ADD CONSTRAINT FKDriverUserId FOREIGN KEY (id) REFERENCES SystemUser (id);
 ALTER TABLE FarmingManager
-    ADD CONSTRAINT FKFarmingMan732235 FOREIGN KEY (id) REFERENCES SystemUser (id);
+    ADD CONSTRAINT FKFarmingManagerUserId FOREIGN KEY (id) REFERENCES SystemUser (id);
 ALTER TABLE Client
-    ADD CONSTRAINT FKClient543685 FOREIGN KEY (id) REFERENCES SystemUser (id);
+    ADD CONSTRAINT FKClientUserId FOREIGN KEY (id) REFERENCES SystemUser (id);
 ALTER TABLE Client
-    ADD CONSTRAINT FKClient934999 FOREIGN KEY (addressOfDelivery) REFERENCES Address (id);
+    ADD CONSTRAINT FKClientUserId FOREIGN KEY (addressOfDelivery) REFERENCES Address (id);
 ALTER TABLE DistributionManager
-    ADD CONSTRAINT FKDistributi353489 FOREIGN KEY (id) REFERENCES SystemUser (id);
+    ADD CONSTRAINT FKDistributionManagerUserId FOREIGN KEY (id) REFERENCES SystemUser (id);
 ALTER TABLE Stable
-    ADD CONSTRAINT FKStable341189 FOREIGN KEY (id) REFERENCES Building (id);
+    ADD CONSTRAINT FKStableBuildingId FOREIGN KEY (id) REFERENCES Building (id);
 ALTER TABLE Silos
-    ADD CONSTRAINT FKSilos108898 FOREIGN KEY (id) REFERENCES Building (id);
+    ADD CONSTRAINT FKSilosBuildingId FOREIGN KEY (id) REFERENCES Building (id);
 ALTER TABLE MachineryGarage
-    ADD CONSTRAINT FKMachineryG460850 FOREIGN KEY (id) REFERENCES Building (id);
+    ADD CONSTRAINT FKMachineryGarageBuildingId FOREIGN KEY (id) REFERENCES Building (id);
 ALTER TABLE ProductionZones
-    ADD CONSTRAINT FKProduction977652 FOREIGN KEY (id) REFERENCES Building (id);
+    ADD CONSTRAINT FKProductionZonesBuildingId FOREIGN KEY (id) REFERENCES Building (id);
 ALTER TABLE SprinklingSystem
-    ADD CONSTRAINT FKSprinkling599100 FOREIGN KEY (id) REFERENCES Building (id);
+    ADD CONSTRAINT FKSprinklingSystemBuildingId FOREIGN KEY (id) REFERENCES Building (id);
 ALTER TABLE Sector
-    ADD CONSTRAINT FKSector30749 FOREIGN KEY (exploration) REFERENCES Exploration (id);
+    ADD CONSTRAINT FKSectorExplorationId FOREIGN KEY (exploration) REFERENCES Exploration (id);
 ALTER TABLE Building
-    ADD CONSTRAINT FKBuilding437043 FOREIGN KEY (exploration) REFERENCES Exploration (id);
+    ADD CONSTRAINT FKBuildingExplorationId FOREIGN KEY (exploration) REFERENCES Exploration (id);
 ALTER TABLE ProductionEntry
-    ADD CONSTRAINT FKProduction589054 FOREIGN KEY (id) REFERENCES ProductionFactors (id);
+    ADD CONSTRAINT FKProductionEntryProductionFactorsId FOREIGN KEY (id) REFERENCES ProductionFactors (id);
 ALTER TABLE SprinklingSystem
-    ADD CONSTRAINT FKSprinkling29700 FOREIGN KEY (primarySystem) REFERENCES TubularSystem (id);
+    ADD CONSTRAINT FKSprinklingSystemTubularSystemPrimary FOREIGN KEY (primarySystem) REFERENCES TubularSystem (id);
 ALTER TABLE SprinklingSystem
-    ADD CONSTRAINT FKSprinkling163735 FOREIGN KEY (secondarySystem) REFERENCES TubularSystem (id);
+    ADD CONSTRAINT FKSprinklingSystemTubularSystemSecondary FOREIGN KEY (secondarySystem) REFERENCES TubularSystem (id);
 ALTER TABLE Sensor
-    ADD CONSTRAINT FKSensor813125 FOREIGN KEY (station) REFERENCES MeteorologicStation (id);
+    ADD CONSTRAINT FKSensorMeteorologicStationId FOREIGN KEY (station) REFERENCES MeteorologicStation (id);
 ALTER TABLE Sector
-    ADD CONSTRAINT FKSector385534 FOREIGN KEY (meteorologicStation) REFERENCES MeteorologicStation (id);
+    ADD CONSTRAINT FKSectorMeteorologicStationId FOREIGN KEY (meteorologicStation) REFERENCES MeteorologicStation (id);
 ALTER TABLE ExplorationClientele
-    ADD CONSTRAINT FKExploratio361648 FOREIGN KEY (client) REFERENCES Client (id);
+    ADD CONSTRAINT FKExplorationClienteleClientId FOREIGN KEY (client) REFERENCES Client (id);
 ALTER TABLE ExplorationClientele
-    ADD CONSTRAINT FKExploratio583177 FOREIGN KEY (exploration) REFERENCES Exploration (id);
+    ADD CONSTRAINT FKExplorationClienteleExplorationId FOREIGN KEY (exploration) REFERENCES Exploration (id);
 ALTER TABLE Exploration
-    ADD CONSTRAINT FKExploratio60216 FOREIGN KEY (address) REFERENCES Address (id);
+    ADD CONSTRAINT FKExplorationAddressId FOREIGN KEY (address) REFERENCES Address (id);
 ALTER TABLE Client
-    ADD CONSTRAINT FKClient395964 FOREIGN KEY (address) REFERENCES Address (id);
+    ADD CONSTRAINT FKClientAddressId FOREIGN KEY (address) REFERENCES Address (id);
 ALTER TABLE Hub
-    ADD CONSTRAINT FKHub655166 FOREIGN KEY (address) REFERENCES Address (id);
+    ADD CONSTRAINT FKHubAddressId FOREIGN KEY (address) REFERENCES Address (id);
 ALTER TABLE BasketOrder
-    ADD CONSTRAINT FKBasketOrde928632 FOREIGN KEY (client) REFERENCES Client (id);
+    ADD CONSTRAINT FKBasketOrderClientId FOREIGN KEY (client) REFERENCES Client (id);
 ALTER TABLE BasketOrder
-    ADD CONSTRAINT FKBasketOrde897679 FOREIGN KEY (basket) REFERENCES Basket (id);
+    ADD CONSTRAINT FKBasketOrderBasketId FOREIGN KEY (basket) REFERENCES Basket (id);
 ALTER TABLE CulturePlan
-    ADD CONSTRAINT FKCulturePla684700 FOREIGN KEY (sprinklingSystem) REFERENCES SprinklingSystem (id);
+    ADD CONSTRAINT FKCulturePlanSprinklingSystemId FOREIGN KEY (sprinklingSystem) REFERENCES SprinklingSystem (id);
 ALTER TABLE CulturePlan
-    ADD CONSTRAINT FKCulturePla243895 FOREIGN KEY (exploration) REFERENCES Exploration (id);
+    ADD CONSTRAINT FKCulturePlanExplorationId FOREIGN KEY (exploration) REFERENCES Exploration (id);
 ALTER TABLE CulturePlan
-    ADD CONSTRAINT FKCulturePla394823 FOREIGN KEY (sector) REFERENCES Sector (id);
+    ADD CONSTRAINT FKCulturePlanExplorationId FOREIGN KEY (sector) REFERENCES Sector (id);
 ALTER TABLE Valve
-    ADD CONSTRAINT FKValve616812 FOREIGN KEY (tubularSystem) REFERENCES TubularSystem (id);
+    ADD CONSTRAINT FKValveTubularSystemId FOREIGN KEY (tubularSystem) REFERENCES TubularSystem (id);
 ALTER TABLE FieldRecording
-    ADD CONSTRAINT FKFieldRecor807369 FOREIGN KEY (exploration) REFERENCES Exploration (id);
+    ADD CONSTRAINT FKFieldRecordingExplorationId FOREIGN KEY (exploration) REFERENCES Exploration (id);
 ALTER TABLE CropWatering
-    ADD CONSTRAINT FKCropWateri752379 FOREIGN KEY (sector) REFERENCES Sector (id);
+    ADD CONSTRAINT FKCropWateringSectorId FOREIGN KEY (sector) REFERENCES Sector (id);
 ALTER TABLE Sector
-    ADD CONSTRAINT FKSector700073 FOREIGN KEY (product) REFERENCES Product (id);
+    ADD CONSTRAINT FKSectorProductId FOREIGN KEY (product) REFERENCES Product (id);
 ALTER TABLE Harvest
-    ADD CONSTRAINT FKHarvest999070 FOREIGN KEY (sector) REFERENCES Sector (id);
+    ADD CONSTRAINT FKHarvestSectorId FOREIGN KEY (sector) REFERENCES Sector (id);
 ALTER TABLE CropWatering
-    ADD CONSTRAINT FKCropWateri427095 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
+    ADD CONSTRAINT FKCropWateringFieldRecordingId FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
 ALTER TABLE Harvest
-    ADD CONSTRAINT FKHarvest791186 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
+    ADD CONSTRAINT FKHarvestFieldRecordingId FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
 ALTER TABLE MeteorologicData
-    ADD CONSTRAINT FKMeteorolog41417 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
+    ADD CONSTRAINT FKMeteorologicDataFieldRecordingId FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
 ALTER TABLE MeteorologicData
-    ADD CONSTRAINT FKMeteorolog357263 FOREIGN KEY (station) REFERENCES MeteorologicStation (id);
+    ADD CONSTRAINT FKMeteorologicDataMeteorologicStationId FOREIGN KEY (station) REFERENCES MeteorologicStation (id);
 ALTER TABLE ProductionFactorsRecording
-    ADD CONSTRAINT FKFieldRecor49323 FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
+    ADD CONSTRAINT FKProductionFactorsRecordingFieldRecordingId FOREIGN KEY (fieldRecording) REFERENCES FieldRecording (exploration);
 ALTER TABLE ProductionFactorsRecording
-    ADD CONSTRAINT FKFieldRecor728316 FOREIGN KEY (productionFactors) REFERENCES ProductionFactors (id);
+    ADD CONSTRAINT FKProductionFactorsRecordingProductionFactorsId FOREIGN KEY (productionFactors) REFERENCES ProductionFactors (id);
 ALTER TABLE BasketOrder
-    ADD CONSTRAINT FKBasketOrde555898 FOREIGN KEY (driver) REFERENCES Driver (id);
+    ADD CONSTRAINT FKBasketOrderDriverId FOREIGN KEY (driver) REFERENCES Driver (id);
 ALTER TABLE BasketProduct
-    ADD CONSTRAINT FKBasketProd161831 FOREIGN KEY (basket) REFERENCES Basket (id);
+    ADD CONSTRAINT FKBasketProductBasketId FOREIGN KEY (basket) REFERENCES Basket (id);
 ALTER TABLE BasketProduct
-    ADD CONSTRAINT FKBasketProd544770 FOREIGN KEY (product) REFERENCES Product (id);
+    ADD CONSTRAINT FKBasketProductProductId FOREIGN KEY (product) REFERENCES Product (id);
 ALTER TABLE AuditLog
-    ADD CONSTRAINT FKAuditLog926921 FOREIGN KEY (userId) REFERENCES SystemUser (id);
+    ADD CONSTRAINT FKAuditLogSystemUserId FOREIGN KEY (userId) REFERENCES SystemUser (id);
 ALTER TABLE BasketOrder
-    ADD CONSTRAINT FKBasketOrde901265 FOREIGN KEY (address) REFERENCES Address (id);
+    ADD CONSTRAINT FKBasketOrderAddressId FOREIGN KEY (address) REFERENCES Address (id);

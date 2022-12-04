@@ -1,7 +1,6 @@
 --CLEAN DATABASE DEPRECATED--
-DELETE Address;
+--First Phase--
 DELETE AuditLog;
-DELETE Basket;
 DELETE BasketOrder;
 DELETE BasketProduct;
 DELETE Building;
@@ -10,17 +9,13 @@ DELETE CropWatering;
 DELETE CulturePlan;
 DELETE DistributionManager;
 DELETE Driver;
-DELETE Exploration;
 DELETE ExplorationClientele;
 DELETE FarmingManager;
-DELETE FieldRecording;
 DELETE PRODUCTIONFACTORSRECORDING;
 DELETE Harvest;
 DELETE Hub;
 DELETE MachineryGarage;
 DELETE MeteorologicData;
-DELETE MeteorologicStation;
-DELETE Product;
 DELETE ProductionEntry;
 DELETE ProductionFactors;
 DELETE ProductionZones;
@@ -32,3 +27,10 @@ DELETE Stable;
 DELETE SystemUser;
 DELETE TubularSystem;
 DELETE Valve;
+--Second Phase--
+DELETE Address;
+DELETE Basket;
+DELETE FieldRecording;
+DELETE MeteorologicStation;
+DELETE Product;
+DELETE Exploration;
