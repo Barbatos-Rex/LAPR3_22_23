@@ -117,17 +117,15 @@ BEGIN
     OPEN itr FOR SELECT BASKETORDER.BASKET, BASKETORDER.QUANTITY
                  FROM BASKETORDER
                           JOIN CLIENT C2 on C2.ID = BASKETORDER.CLIENT
-                 WHERE ORDERDATE >= LASTINCIDENTDATE;
+                 WHERE ORDERDATE >= COALESCE(LASTINCIDENTDATE, TO_DATE('01/01/0001', 'DD/MM/YYYY'))
+                   AND PAYED = 'N';
     result := 0;
     LOOP
         FETCH itr INTO basketId,amount;
         EXIT WHEN itr%notfound;
-        SELECT sum(P.PRICE)
+        SELECT BASKET.PRICE
         into tmp
-        FROM BASKET
-                 JOIN BASKETPRODUCT B on BASKET.ID = B.BASKET
-                 JOIN PRODUCT P on P.ID = B.PRODUCT;
-
+        FROM BASKET;
         result := result + tmp * amount;
     end loop;
 
@@ -136,8 +134,12 @@ BEGIN
     FROM BASKETORDER
     WHERE PAYED = 'N'
       AND CLIENT = clientId
-      AND DUEDATE >= SYSDATE - 365;
+      AND ORDERDATE >= SYSDATE - 365
+      AND DUEDATE < SYSDATE;
     return result / incidentsN;
+EXCEPTION
+    WHEN ZERO_DIVIDE THEN
+        return 0;
 end;
 
 CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type)
@@ -295,13 +297,9 @@ BEGIN
                            STATUS,
                            ADDRESS,
                            ORDERNUMBER,
-                           (SELECT sum(P.PRICE)
-                            FROM BASKET B
-                                     JOIN BASKETPRODUCT B2 on B.ID = B2.BASKET
-                                     JOIN PRODUCT P on P.ID = B2.PRODUCT
-                            WHERE B.ID = PA.BASKET
-                            GROUP BY P.PRICE) * PA.QUANTITY as PRICE
+                           B.PRICE * PA.QUANTITY as PRICE
                     FROM BASKETORDER PA
+                             JOIN BASKET B on B.ID = PA.BASKET
                     ORDER BY PRICE DESC;
     return result;
 end;
