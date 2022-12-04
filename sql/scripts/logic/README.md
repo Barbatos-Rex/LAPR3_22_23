@@ -65,19 +65,18 @@ CREATE OR REPLACE PROCEDURE prcUS206CreateSector(userCallerId IN SYSTEMUSER.ID%t
                                                  explorationId IN SECTOR.EXPLORATION%type,
                                                  productId IN SECTOR.PRODUCT%type, sectorId out SECTOR.ID%type) as
 begin
+    SAVEPOINT BeforeCall;
     INSERT INTO SECTOR(DESIGNATION, AREA, EXPLORATION, CULTUREPLAN, PRODUCT)
-    VALUES (designationParam, areaParam, explorationId, 0, productId);
+    VALUES (designationParam, areaParam, explorationId, 0, productId) RETURNING ID INTO sectorId;
     INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
     VALUES (sysdate, userCallerId, 'INSERT', 'INSERT INTO SECTOR(DESIGNATION, AREA, EXPLORATION, CULTUREPLAN, PRODUCT)
     VALUES (designationParam, areaParam, explorationId, 0, productId);');
-
-    SELECT ID
-    into sectorId
-    FROM SECTOR
-    WHERE DESIGNATION = designationParam
-      AND PRODUCT = productId
-      AND EXPLORATION = explorationId
-    ORDER BY ID DESC FETCH FIRST ROW ONLY;
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Added sector to database');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Could not create entry to the database');
+        ROLLBACK TO SAVEPOINT BeforeCall;
 end;
 ```
 
@@ -150,36 +149,6 @@ who called this function, the id of the factor, the name of the entry, the unit 
 the amount present on the product and the type of the entry.
 
 ```sql
-CREATE OR REPLACE PROCEDURE prcUS208AddProductionFactor(userCallerId in SYSTEMUSER.ID%type,
-                                                        fieldRecordingId IN FIELDRECORDING.EXPLORATION%type,
-                                                        productName IN PRODUCTIONFACTORS.NAME%type,
-                                                        productFormulation IN PRODUCTIONFACTORS.FORMULATION%type,
-                                                        supplierName IN PRODUCTIONFACTORS.SUPPLIER%type,
-                                                        productFactorId OUT PRODUCTIONFACTORS.ID%type) AS
-    dateToUse DATE := sysdate;
-BEGIN
-    SAVEPOINT BeforeCall;
-    INSERT INTO PRODUCTIONFACTORS(NAME, FORMULATION, SUPPLIER)
-    VALUES (productName, productFormulation, supplierName)
-    returning ID into productFactorId;
-
-    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
-    VALUES (dateToUse, userCallerId, 'INSERT', 'INSERT INTO PRODUCTIONFACTORS(NAME, FORMULATION,SUPPLIER)
-    VALUES (' || productName || ',' || productFormulation || ',' || supplierName || ')');
-
-    INSERT INTO PRODUCTIONFACTORSRECORDING(FIELDRECORDING, PRODUCTIONFACTORS, DATEOFRECORDING)
-    VALUES (fieldRecordingId, productFactorId, dateToUse);
-    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
-    VALUES (dateToUse, userCallerId, 'INSERT', 'INSERT INTO PRODUCTIONFACTORSRECORDING(FIELDRECORDING, PRODUCTIONFACTORS, DATEOFRECORDING)
-    VALUES (' || fieldRecordingId || ',' || productFactorId || ',' || dateToUse || ')');
-    COMMIT;
-    DBMS_OUTPUT.PUT_LINE('Added factor to the database');
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Could not create the entry for the product');
-        ROLLBACK TO SAVEPOINT BeforeCall;
-end;
-
 CREATE OR REPLACE PROCEDURE prcUS208AddEntryToProductionFactor(userCallerId in SYSTEMUSER.ID%type,
                                                                productFactorId in PRODUCTIONFACTORS.ID%type,
                                                                entryName IN PRODUCTIONENTRY.NAME%type,
@@ -236,7 +205,7 @@ BEGIN
     into unpaidValue
     FROM BASKETORDER PARENT
     WHERE CLIENT = clientId
-      AND PAYED = 'N';
+      AND PAYED='N';
 
     SELECT sum(P.PRICE)
     into basketPrice
@@ -316,12 +285,14 @@ variable
 creating the record into the correct table. The function will print the user id and will return such value.
 
 ```sql
+--DEPRECATED FOR CLIENTS--
 CREATE OR REPLACE FUNCTION fncUS205CreateUser(userCallerId IN SYSTEMUSER.ID%type, userType IN VARCHAR2,
                                               userEmail IN SYSTEMUSER.EMAIL%TYPE,
                                               userPassword IN SYSTEMUSER.PASSWORD%TYPE) RETURN SYSTEMUSER.ID%TYPE AS
     userId    SYSTEMUSER.ID%TYPE;
     nullEmail SYSTEMUSER.ID%TYPE;
 BEGIN
+    SAVEPOINT BeforeCall;
     SELECT EMAIL into nullEmail FROM SYSTEMUSER WHERE EMAIL = userEmail;
 
     if (nullEmail is not null) then
@@ -351,12 +322,16 @@ BEGIN
         VALUES (sysdate, userCallerId, 'INSERT', 'INSERT INTO DISTRIBUTIONMANAGER(ID) VALUES (' || userId || ');');
     else
         ROLLBACK;
-        RAISE_APPLICATION_ERROR(-20001,
+        RAISE_APPLICATION_ERROR(-20002,
                                 'User type is incorrect! It should be one of the following: [client,driver,farm,distribution]');
     end if;
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('New System User ID: ' || userId);
     return userId;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK TO SAVEPOINT BeforeCall;
+        RAISE;
 end;
 ```
 
@@ -384,17 +359,15 @@ BEGIN
     OPEN itr FOR SELECT BASKETORDER.BASKET, BASKETORDER.QUANTITY
                  FROM BASKETORDER
                           JOIN CLIENT C2 on C2.ID = BASKETORDER.CLIENT
-                 WHERE ORDERDATE >= LASTINCIDENTDATE;
+                 WHERE ORDERDATE >= COALESCE(LASTINCIDENTDATE, TO_DATE('01/01/0001', 'DD/MM/YYYY'))
+                   AND PAYED = 'N' AND CLIENT=clientId;
     result := 0;
     LOOP
         FETCH itr INTO basketId,amount;
         EXIT WHEN itr%notfound;
-        SELECT sum(P.PRICE)
+        SELECT BASKET.PRICE
         into tmp
-        FROM BASKET
-                 JOIN BASKETPRODUCT B on BASKET.ID = B.BASKET
-                 JOIN PRODUCT P on P.ID = B.PRODUCT;
-
+        FROM BASKET;
         result := result + tmp * amount;
     end loop;
 
@@ -403,16 +376,12 @@ BEGIN
     FROM BASKETORDER
     WHERE PAYED = 'N'
       AND CLIENT = clientId
-      AND DUEDATE >= SYSDATE - 365;
+      AND ORDERDATE >= SYSDATE - 365
+      AND DUEDATE < SYSDATE;
     return result / incidentsN;
-end;
-
-CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type)
-    RETURN SYS_REFCURSOR AS
-    result Sys_Refcursor;
-BEGIN
-    OPEN result for SELECT * FROM SECTOR WHERE EXPLORATION = explorationId ORDER BY DESIGNATION;
-    return result;
+EXCEPTION
+    WHEN ZERO_DIVIDE THEN
+        return 0;
 end;
 ```
 
@@ -426,8 +395,8 @@ DROP FUNCTION fncUS205ClientRiskFactor;
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS205CreateClient(userCallerId IN SYSTEMUSER.ID%type, userEmail IN SYSTEMUSER.EMAIL%type,
-                                                addressOfResidence IN OUT ADDRESS.ZIPCODE%type,
-                                                addressOfDelivery IN OUT ADDRESS.ZIPCODE%type,
+                                                addressOfResidence IN ADDRESS.ZIPCODE%type,
+                                                addressOfDelivery IN ADDRESS.ZIPCODE%type,
                                                 clientName IN CLIENT.NAME%type, clientNIF IN CLIENT.NIF%type,
                                                 userPassword in SYSTEMUSER.PASSWORD%type DEFAULT NULL,
                                                 clientPlafond IN CLIENT.PLAFOND%type DEFAULT 100000,
@@ -442,14 +411,10 @@ CREATE OR REPLACE FUNCTION fncUS205CreateClient(userCallerId IN SYSTEMUSER.ID%ty
     tmpDistrict        ADDRESS.DISTRICT%type;
     idAddressResidence ADDRESS.ID%type;
     idAddressDelivery  ADDRESS.ID%type;
-    nullEmail          SYSTEMUSER.EMAIL%type;
     realPassword       SYSTEMUSER.PASSWORD%type;
+    resAddr            ADDRESS.ZIPCODE%type;
+    devAddr            ADDRESS.ZIPCODE%type;
 BEGIN
-    SAVEPOINT BeforeCall;
-    SELECT EMAIL into nullEmail FROM SYSTEMUSER WHERE EMAIL = userEmail;
-    if (nullEmail is not null) then
-        RAISE_APPLICATION_ERROR(-20001, 'Email already exists in database!');
-    end if;
 
     if (userPassword IS NULL) then
         realPassword := 'Qwerty123';
@@ -460,25 +425,15 @@ BEGIN
     if (COALESCE(addressOfDelivery, addressOfResidence) IS NULL) then
         RAISE_APPLICATION_ERROR(-20003, 'Zipcodes cannot be null');
     end if;
-
+    devAddr := addressOfDelivery;
+    resAddr := addressOfResidence;
     if (addressOfDelivery IS NULL) THEN
-        addressOfDelivery := addressOfResidence;
+        devAddr := addressOfResidence;
     ELSIF (addressOfResidence IS NULL) THEN
-        addressOfResidence := addressOfDelivery;
+        resAddr := addressOfDelivery;
     end if;
-
-    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfDelivery FETCH FIRST ROW ONLY;
-
-    if (tmpDistrict IS NULL) then
-        INSERT INTO ADDRESS(zipcode) VALUES (addressOfDelivery) returning ID into idAddressDelivery;
-    end if;
-
-    SELECT DISTRICT into tmpDistrict FROM ADDRESS WHERE ZIPCODE = addressOfResidence;
-
-    if (tmpDistrict IS NULL) then
-        INSERT INTO ADDRESS(zipcode) VALUES (addressOfResidence) returning ID into idAddressResidence;
-    end if;
-
+    INSERT INTO ADDRESS(zipcode) VALUES (devAddr) returning ID into idAddressDelivery;
+    INSERT INTO ADDRESS(zipcode) VALUES (resAddr) returning ID into idAddressResidence;
     INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (userEmail, realPassword) returning ID INTO clientId;
     PRCUS000LOG(userCallerId, 'INSERT',
                 'INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (' || userEmail || ',' || userPassword ||
@@ -488,11 +443,12 @@ BEGIN
                        ADDRESSOFDELIVERY, PRIORITYLEVEL, LASTYEARINCIDENTS)
     VALUES (clientId, idAddressResidence, clientName, clientNIF, clientPlafond, clientIncidents, clientLastIncidentDate,
             clientLastYearOrders, clientLastYearSpent, idAddressDelivery, clientPriority, clientLastYearIncidents);
-    COMMIT;
     return clientId;
 EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Email already exists in database!');
+        return null;
     WHEN OTHERS THEN
-        ROLLBACK TO SAVEPOINT BeforeCall;
         RAISE;
 end;
 ```
@@ -530,7 +486,8 @@ After having the result, the function returns the cursor containing a list of el
 with the ```Sector%ROWTYPE``` profile.
 
 ```sql
-CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type) RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS206OrderSectorByDesignation(explorationId IN EXPLORATION.ID%type)
+    RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
     OPEN result for SELECT * FROM SECTOR WHERE EXPLORATION = explorationId ORDER BY DESIGNATION;
@@ -553,7 +510,8 @@ profile.
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS206OrderSectorBySize(explorationId IN EXPLORATION.ID%type,
-                                                     orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
+                                                     orderType IN VARCHAR2 DEFAULT 'ASC')
+    RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
     if (orderType = 'DESC') then
@@ -581,9 +539,9 @@ After having the result, the function returns the cursor containing a list of el
 with the ```{SECTOR.ID%type, SECTOR.DESIGNATION%type, PRODUCT.NAME%type, PRODUCT.TYPE%type}``` profile.
 
 ```sql
-CREATE OR REPLACE FUNCTION fncUS206OrderSectorByCrop(explorationId IN EXPLORATION.ID%type,
-                                                     arg IN VARCHAR2 DEFAULT 'TYPE',
-                                                     orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS206OrderSectorByCrop(explorationId IN EXPLORATION.ID%type, arg IN VARCHAR2,
+                                                     orderType IN VARCHAR2 DEFAULT 'ASC')
+    RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
     if (arg = 'TYPE') then
@@ -650,7 +608,8 @@ with the ```{SECTOR.DESIGNATION%type, HARVEST.NUMBEROFUNITS%type}``` profile.
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS207OrderSectorByMaxHarvest(explorationId IN EXPLORATION.ID%type,
-                                                           orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR AS
+                                                           orderType IN VARCHAR2 DEFAULT 'ASC')
+    RETURN SYS_REFCURSOR AS
     result SYS_REFCURSOR;
 BEGIN
     if (orderType = 'DESC') then
@@ -691,7 +650,8 @@ with the ```{SECTOR.DESIGNATION%type, NUMERIC}``` profile.
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS207OrderSectorByRentability(explorationId IN EXPLORATION.ID%type,
-                                                            orderType IN VARCHAR2 DEFAULT 'ASC') RETURN SYS_REFCURSOR as
+                                                            orderType IN VARCHAR2 DEFAULT 'ASC')
+    RETURN SYS_REFCURSOR as
     result Sys_Refcursor;
 BEGIN
     IF (orderType = 'DESC') then
@@ -724,10 +684,10 @@ DROP FUNCTION fncUS207OrderSectorByRentability;
 #### fncUS209ListOrdersByStatus
 
 ````sql
-CREATE OR REPLACE FUNCTION fncUS209ListOrdersByStatus(orderStatus BASKETORDER.STATUS%type) RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByDateOfOrder RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
-    OPEN result FOR SELECT * FROM BASKETORDER WHERE STATUS = orderStatus;
+    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY ORDERDATE;
     return result;
 end;
 ````
@@ -739,10 +699,10 @@ DROP FUNCTION fncUS209ListOrdersByStatus;
 #### fncUS209ListOrdersByDateOfOrder
 
 ```sql
-CREATE OR REPLACE FUNCTION fncUS209ListOrdersByDateOfOrder RETURN SYS_REFCURSOR AS
+CREATE OR REPLACE FUNCTION fncUS209ListOrdersByClient(idClient BASKETORDER.CLIENT%type) RETURN SYS_REFCURSOR AS
     result Sys_Refcursor;
 BEGIN
-    OPEN result FOR SELECT * FROM BASKETORDER ORDER BY ORDERDATE;
+    OPEN result FOR SELECT * FROM BASKETORDER WHERE CLIENT = idClient ORDER BY ORDERDATE;
     return result;
 end;
 ```
@@ -812,13 +772,9 @@ BEGIN
                            STATUS,
                            ADDRESS,
                            ORDERNUMBER,
-                           (SELECT sum(P.PRICE)
-                            FROM BASKET B
-                                     JOIN BASKETPRODUCT B2 on B.ID = B2.BASKET
-                                     JOIN PRODUCT P on P.ID = B2.PRODUCT
-                            WHERE B.ID = PA.BASKET
-                            GROUP BY P.PRICE) * PA.QUANTITY as PRICE
+                           B.PRICE * PA.QUANTITY as PRICE
                     FROM BASKETORDER PA
+                             JOIN BASKET B on B.ID = PA.BASKET
                     ORDER BY PRICE DESC;
     return result;
 end;
