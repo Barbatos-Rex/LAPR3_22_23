@@ -1,5 +1,4 @@
 --CLEAN DATABASE DEPRECATED--
-
 DELETE Address;
 DELETE AuditLog;
 DELETE Basket;
@@ -15,7 +14,7 @@ DELETE Exploration;
 DELETE ExplorationClientele;
 DELETE FarmingManager;
 DELETE FieldRecording;
-DELETE FieldRecording_ProductionFactors;
+DELETE PRODUCTIONFACTORSRECORDING;
 DELETE Harvest;
 DELETE Hub;
 DELETE MachineryGarage;
@@ -29,7 +28,7 @@ DELETE Sector;
 DELETE Sensor;
 DELETE Silos;
 DELETE SprinklingSystem;
-DELETE STABLE;
+DELETE Stable;
 DELETE SystemUser;
 DELETE TubularSystem;
 DELETE Valve;
