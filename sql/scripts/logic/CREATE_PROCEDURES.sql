@@ -31,7 +31,8 @@ CREATE OR REPLACE PROCEDURE prcUS206CreateSector(userCallerId IN SYSTEMUSER.ID%t
 begin
     SAVEPOINT BeforeCall;
     INSERT INTO SECTOR(DESIGNATION, AREA, EXPLORATION, CULTUREPLAN, PRODUCT)
-    VALUES (designationParam, areaParam, explorationId, 0, productId) RETURNING ID INTO sectorId;
+    VALUES (designationParam, areaParam, explorationId, 0, productId)
+    RETURNING ID INTO sectorId;
     INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND)
     VALUES (sysdate, userCallerId, 'INSERT', 'INSERT INTO SECTOR(DESIGNATION, AREA, EXPLORATION, CULTUREPLAN, PRODUCT)
     VALUES (designationParam, areaParam, explorationId, 0, productId);');
@@ -94,12 +95,6 @@ EXCEPTION
         ROLLBACK TO SAVEPOINT BeforeCall;
 end;
 
-CREATE OR REPLACE PROCEDURE prcUS000LOG(callerId IN SYSTEMUSER.ID%type, logType IN AUDITLOG.TYPE%type,
-                                        logCommand IN AUDITLOG.COMMAND%type) AS
-BEGIN
-    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND) VALUES (sysdate, callerId, logType, logCommand);
-end;
-
 CREATE OR REPLACE PROCEDURE prcUS209OrderBasket(clientId IN SYSTEMUSER.ID%type, basketId IN BASKETORDER.BASKET%type,
                                                 numberOfBaskets IN BASKETORDER.QUANTITY%type,
                                                 orderDueDate IN BASKETORDER.DUEDATE%type DEFAULT SYSDATE + 10,
@@ -120,7 +115,7 @@ BEGIN
     into unpaidValue
     FROM BASKETORDER PARENT
     WHERE CLIENT = clientId
-      AND PAYED='N';
+      AND PAYED = 'N';
 
     SELECT sum(P.PRICE)
     into basketPrice
@@ -138,4 +133,10 @@ BEGIN
     INSERT INTO BASKETORDER(CLIENT, BASKET, QUANTITY, DUEDATE, DELIVERYDATE, ADDRESS)
     VALUES (clientId, basketId, numberOfBaskets, orderDueDate, orderDeliveryDate, deliveryAddress);
 
+end;
+
+CREATE OR REPLACE PROCEDURE prcUS213LOG(callerId IN SYSTEMUSER.ID%type, logType IN AUDITLOG.TYPE%type,
+                                        logCommand IN AUDITLOG.COMMAND%type) AS
+BEGIN
+    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND) VALUES (sysdate, callerId, logType, logCommand);
 end;

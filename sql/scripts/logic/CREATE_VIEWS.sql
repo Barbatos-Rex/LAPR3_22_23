@@ -14,3 +14,23 @@ SELECT ID                                                          AS "Client's 
           AND STATUS = 'DELIVERED'
           AND PAYED = 'N')                                         AS "Number of orders awaiting payment"
 FROM CLIENT CParent;
+
+
+CREATE OR REPLACE VIEW AuditSimpleScan AS
+SELECT USERID       as "User Id",
+       EMAIL        as "User Email",
+       DATEOFACTION as "Date of Action",
+       TYPE         as "Action Type"
+FROM AUDITLOG
+         JOIN SYSTEMUSER S on AUDITLOG.USERID = S.ID
+ORDER BY "Date of Action";
+
+CREATE OR REPLACE VIEW AuditCompleteScan AS
+SELECT USERID       as "User Id",
+       EMAIL        as "User Email",
+       DATEOFACTION as "Date of Action",
+       TYPE         as "Action Type",
+       COMMAND      as "Command Performed"
+FROM AUDITLOG
+         JOIN SYSTEMUSER S on AUDITLOG.USERID = S.ID
+ORDER BY "Date of Action";

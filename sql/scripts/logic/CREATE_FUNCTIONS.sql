@@ -88,7 +88,7 @@ BEGIN
     INSERT INTO ADDRESS(zipcode) VALUES (devAddr) returning ID into idAddressDelivery;
     INSERT INTO ADDRESS(zipcode) VALUES (resAddr) returning ID into idAddressResidence;
     INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (userEmail, realPassword) returning ID INTO clientId;
-    PRCUS000LOG(userCallerId, 'INSERT',
+    PRCUS213LOG(userCallerId, 'INSERT',
                 'INSERT INTO SYSTEMUSER(EMAIL, PASSWORD) VALUES (' || userEmail || ',' || userPassword ||
                 ') returning ID INTO clientId');
 
