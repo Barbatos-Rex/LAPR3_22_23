@@ -118,7 +118,8 @@ BEGIN
                  FROM BASKETORDER
                           JOIN CLIENT C2 on C2.ID = BASKETORDER.CLIENT
                  WHERE ORDERDATE >= COALESCE(LASTINCIDENTDATE, TO_DATE('01/01/0001', 'DD/MM/YYYY'))
-                   AND PAYED = 'N' AND CLIENT=clientId;
+                   AND PAYED = 'N'
+                   AND CLIENT = clientId;
     result := 0;
     LOOP
         FETCH itr INTO basketId,amount;
@@ -302,4 +303,74 @@ BEGIN
                              JOIN BASKET B on B.ID = PA.BASKET
                     ORDER BY PRICE DESC;
     return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS212GetTheNthSensorReading(entryNumber IN NUMBER(20, 0)) RETURN VARCHAR2(25) AS
+    result   VARCHAR2(25);
+    tmp      VARCHAR2(25);
+    readings NUMBER(20, 0);
+    cur      SYS_REFCURSOR;
+    tmpC     NUMBER(20, 0);
+BEGIN
+    result := NULL;
+    SELECT count(*) into readings FROM input_sensor;
+    if (entryNumber > readings) THEN
+        RAISE_APPLICATION_ERROR(-20005, 'There is no entry for the ' || entryNumber || ' position! There are only ' ||
+                                        readings || ' entries!');
+    end if;
+    OPEN cur FOR SELECT * from input_sensor;
+    LOOP
+        FETCH cur INTO tmp;
+        EXIT WHEN cur%notfound;
+        if (tmpC = entryNumber) THEN
+            result := tmp;
+        end if;
+        tmpc := tmpC + 1;
+    end loop;
+    close cur;
+    return result;
+end;
+
+CREATE OR REPLACE FUNCTION fncUS212IsValidReading(reading IN varchar,
+                                                  id OUT VARCHAR2,
+                                                  sensorType OUT VARCHAR2,
+                                                  value OUT NUMBER,
+                                                  uniqueNum OUT NUMBER,
+                                                  readingDate OUT date) RETURN boolean AS
+
+    iden       VARCHAR2(5);
+    senType    VARCHAR2(2);
+    val        VARCHAR2(3);
+    idNum      VARCHAR2(2);
+    charDate   VARCHAR2(12);
+    flag       BOOLEAN      := TRUE;
+    dateformat varchar2(15) := 'DDMMYYYYHHMI';
+
+BEGIN
+
+    iden := SUBSTR(reading, 0, 5);
+    senType := SUBSTR(reading, 6, 2);
+    val := SUBSTR(reading, 8, 3);
+    idNum := SUBSTR(reading, 11, 2);
+    charDate := SUBSTR(reading, 13);
+
+    if (iden is null OR senType is null OR val is null OR idNum is null OR charDate is null) then
+        flag := FALSE;
+    end if;
+    id := iden;
+    if (NOT (senType = 'HS' OR senType = 'PL' OR senType = 'TS' OR senType = 'VV' OR senType = 'TA'
+        OR senType = 'HA' OR senType = 'PA')) THEN
+        flag := false;
+    end if;
+    sensorType := senType;
+    if (TO_NUMBER(val, '999') > 100 OR TO_NUMBER(val, '999') < 0) THEN
+        flag := false;
+    end if;
+    value := TO_NUMBER(val, '999');
+    uniqueNum := TO_NUMBER(idNum, '99');
+    readingDate := TO_DATE(charDate, dateformat);
+    return flag;
+EXCEPTION
+    WHEN OTHERS THEN
+        return false;
 end;

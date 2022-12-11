@@ -135,6 +135,45 @@ BEGIN
 
 end;
 
+CREATE OR REPLACE PROCEDURE prcUS212TransferInputsToSensorReadings(userCallerID IN SYSTEMUSER.ID%type, numberValid OUT NUMBER,
+                                                                   numberInvalid OUT NUMBER) AS
+    numValid    NUMBER(20, 0) := 0;
+    numInvalid  NUMBER(20, 0) := 0;
+    CUR         SYS_REFCURSOR;
+    reading     VARCHAR2(25);
+    rid         input_sensor.ID%type;
+    idSen       VARCHAR2(5);
+    senType     VARCHAR2(2);
+    value       NUMBER(3);
+    uniqueNum   NUMBER(2);
+    readingDate date;
+    counter     NUMBER(10, 0) := 0;
+
+BEGIN
+    open CUR for SELECT * FROM input_sensor;
+    LOOP
+        FETCH CUR into rid,reading;
+        EXIT WHEN CUR%NOTFOUND;
+        if (FNCUS212ISVALIDREADING(reading, idSen, senType, value, uniqueNum, readingDate)) then
+            numValid := numValid + 1;
+            SELECT count(*) into counter FROM SENSOR WHERE SENSOR.ID = idSen;
+            if (counter = 0) THEN
+                INSERT INTO SENSOR(id, sensortype, uniquenumber) VALUES (idSen, senType, uniqueNum);
+                prcUS213LOG(userCallerID, 'INSERT', 'INSERT INTO SENSOR(id, sensortype, uniquenumber) VALUES (' ||
+                                                    idSen || ',' || senType || ',' || uniqueNum || ')');
+            end if;
+            INSERT INTO SENSORREADING(DATEOFREADING, SENSOR, READING) VALUES (readingDate, idSen, value);
+            prcUS213LOG(userCallerID, 'INSERT', ' INSERT INTO SENSORREADING(DATEOFREADING, SENSOR, READING) VALUES (' ||
+                                                readingDate || ',' || idSen || ',' || value || ')');
+            DELETE INPUT_SENSOR WHERE ID = rid;
+        else
+            numInvalid := numInvalid + 1;
+        end if;
+    end LOOP;
+    numberValid := numValid;
+    numberInvalid := numInvalid;
+end;
+
 CREATE OR REPLACE PROCEDURE prcUS213LOG(callerId IN SYSTEMUSER.ID%type, logType IN AUDITLOG.TYPE%type,
                                         logCommand IN AUDITLOG.COMMAND%type) AS
 BEGIN
