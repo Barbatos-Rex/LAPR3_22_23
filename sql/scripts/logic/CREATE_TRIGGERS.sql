@@ -24,3 +24,47 @@ CREATE OR REPLACE TRIGGER trgFindFieldRecording
 BEGIN
     SELECT EXPLORATION into :new.FIELDRECORDING FROM SECTOR WHERE ID = :new.SECTOR;
 end;
+
+CREATE OR REPLACE TRIGGER trgRegisterOperation
+    BEFORE INSERT
+    ON ProductionFactorsRecording
+    FOR EACH ROW
+    WHEN ( new.operation IS NULL )
+BEGIN
+    INSERT INTO OPERATION(STATUS) VALUES ('PENDING') RETURNING ID INTO :new.OPERATION;
+end;
+
+CREATE OR REPLACE TRIGGER trgRegisterOperation
+    BEFORE INSERT
+    ON CropWatering
+    FOR EACH ROW
+    WHEN ( new.operation IS NULL )
+BEGIN
+    INSERT INTO OPERATION(STATUS) VALUES ('PENDING') RETURNING ID INTO :new.OPERATION;
+end;
+
+CREATE OR REPLACE TRIGGER trgAlterProductionFactorsRecording
+    BEFORE UPDATE
+    ON ProductionFactorsRecording
+    FOR EACH ROW
+DECLARE
+    stat OPERATION.STATUS%TYPE;
+BEGIN
+    SELECT STATUS into stat FROM OPERATION WHERE ID = :new.operation;
+    if (stat <> 'PENDING') THEN
+        RAISE_APPLICATION_ERROR(-20007, 'Cannot alter a non pending operation!');
+    end if;
+end;
+
+CREATE OR REPLACE TRIGGER trgCropWatering
+    BEFORE UPDATE
+    ON CropWatering
+    FOR EACH ROW
+DECLARE
+    stat OPERATION.STATUS%TYPE;
+BEGIN
+    SELECT STATUS into stat FROM OPERATION WHERE ID = :new.operation;
+    if (stat <> 'PENDING') THEN
+        RAISE_APPLICATION_ERROR(-20007, 'Cannot alter a non pending operation!');
+    end if;
+end;

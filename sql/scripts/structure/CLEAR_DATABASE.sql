@@ -37,3 +37,4 @@ DELETE Sensor;
 DELETE MeteorologicStation;
 DELETE Product;
 DELETE Exploration;
+DELETE OPERATION;
