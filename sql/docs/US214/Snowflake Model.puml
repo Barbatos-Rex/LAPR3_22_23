@@ -1,0 +1,82 @@
+@startuml
+title "Snowflake Model"
+
+skinparam linetype pol
+
+hide methods
+
+class Production <<(F,#5087FF)>>{
+    {static}productionId
+    timeId
+    sectorId
+    productId
+    amount
+}
+
+class Sale <<(F,#5087FF)>>{
+    {static} saleId
+    timeId
+    clientId
+    productId
+    quantity
+}
+
+
+
+class Time <<(D,#FFA500)>>{
+    {static}timeId
+    year
+    month
+}
+
+class Year<<(D,#FFA500)>>{
+    {static} year
+}
+class Month<<(D,#FFA500)>>{
+    {static} month
+}
+
+
+class Client<<(D,#FFA500)>>{
+    {static} clientId
+    nif
+    address
+}
+class Product<<(D,#FFA500)>>{
+    {static} productId
+    type
+    name
+}
+
+class ProductName<<(D,#FFA500)>>{
+    {static} name
+}
+
+class ProductType<<(D,#FFA500)>>{
+    {static} type
+}
+
+class Sector<<(D,#FFA500)>>{
+    {static}sectorId
+    name
+    explorationId
+}
+
+Production "N" -down-- "1" Time
+Sale "N" -down-- "1" Time
+Sale "N" -up-- "1" Product
+Production "N" -up-- "1" Product
+
+Sale "N" -right "1" Client
+Production "N" -left "1" Sector
+
+Time "N" -left "1" Year
+Time "N" -right "1" Month
+
+Product "N" -left "1" ProductName
+Product "N" -right "1" ProductType
+
+
+
+
+@enduml

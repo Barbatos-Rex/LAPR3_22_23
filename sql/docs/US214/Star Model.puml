@@ -1,0 +1,52 @@
+@startuml
+title "Star Model"
+
+skinparam linetype pol
+
+hide methods
+
+class Production <<(F,#5087FF)>>{
+    {static}productionId
+    timeId
+    sectorId
+    productId
+    amount
+}
+class Sale <<(F,#5087FF)>>{
+    {static} saleId
+    timeId
+    clientId
+    productId
+    quantity
+}
+class Time <<(D,#FFA500)>>{
+    {static}timeId
+    year
+    month
+}
+class Client<<(D,#FFA500)>>{
+    {static} clientId
+    nif
+}
+class Product<<(D,#FFA500)>>{
+    {static} productId
+    type
+    name
+}
+class Sector<<(D,#FFA500)>>{
+    {static}sectorId
+    name
+    explorationId
+}
+
+Production "N" -down-- "1" Time
+Sale "N" -down-- "1" Time
+Sale "N" -up-- "1" Product
+Production "N" -up-- "1" Product
+
+Sale "N" -left "1" Client
+Production "N" -right "1" Sector
+
+
+
+@enduml
