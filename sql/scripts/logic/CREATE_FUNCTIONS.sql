@@ -342,9 +342,9 @@ CREATE OR REPLACE FUNCTION fncUS212IsValidReading(reading IN varchar,
     senType    VARCHAR2(2);
     val        VARCHAR2(3);
     idNum      VARCHAR2(2);
-    charDate   VARCHAR2(12);
+    charDate   VARCHAR2(13);
     flag       BOOLEAN      := TRUE;
-    dateformat varchar2(15) := 'DDMMYYYYHHMI';
+    dateformat varchar2(15) := 'DDMMYYYYHH:MI';
 
 BEGIN
 

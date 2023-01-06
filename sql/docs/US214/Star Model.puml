@@ -5,6 +5,13 @@ skinparam linetype pol
 
 hide methods
 
+class Hub <<(D,#FFA500)>>{
+    {static} hubId
+    hubType
+}
+
+
+
 class Production <<(F,#5087FF)>>{
     {static}productionId
     timeId
@@ -18,6 +25,7 @@ class Sale <<(F,#5087FF)>>{
     clientId
     productId
     quantity
+    hubId
 }
 class Time <<(D,#FFA500)>>{
     {static}timeId
@@ -46,7 +54,7 @@ Production "N" -up-- "1" Product
 
 Sale "N" -left "1" Client
 Production "N" -right "1" Sector
-
+Sale "N" --- "1" Hub
 
 
 @enduml

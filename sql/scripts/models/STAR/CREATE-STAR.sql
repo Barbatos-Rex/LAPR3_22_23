@@ -28,6 +28,7 @@ CREATE TABLE SALE
     clientId  NUMBER(10, 0) NOT NULL,
     productId NUMBER(10, 0) NOT NULL,
     quantity  NUMBER(10, 0) NOT NULL,
+    hub       VARCHAR2(5)   NOT NULL,
     PRIMARY KEY (saleId)
 );
 CREATE TABLE SECTOR
@@ -42,6 +43,11 @@ CREATE TABLE TIME
     timeId NUMBER(10, 0) NOT NULL PRIMARY KEY,
     year   NUMBER(4, 0)  NOT NULL,
     month  NUMBER(2, 0)  NOT NULL CHECK ( month BETWEEN 1 AND 12)
+);
+CREATE TABLE HUB
+(
+    hubId   VARCHAR2(5)   NOT NULL PRIMARY KEY,
+    hubType VARCHAR2(255) NOT NULL
 );
 
 
@@ -59,6 +65,8 @@ ALTER TABLE SALE
     ADD CONSTRAINT FKSaleProductId FOREIGN KEY (productId) REFERENCES PRODUCT (productId);
 ALTER TABLE SALE
     ADD CONSTRAINT FKSaleTimeId FOREIGN KEY (timeId) REFERENCES TIME (timeId);
+ALTER TABLE SALE
+    ADD CONSTRAINT FKSaleHubId FOREIGN KEY (hub) references HUB (hubId);
 
 
 --OPTIONAL BOOT--
@@ -87,11 +95,11 @@ BEGIN
     INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (6, 'Temporary', 'Potato');
     INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (7, 'Temporary', 'Strawberry');
     INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (8, 'Temporary', 'Asparagus');
-    COMMIT;
+
     INSERT INTO CLIENT(clientId, nif) VALUES (1, 239745158);
     INSERT INTO CLIENT(clientId, nif) VALUES (2, 219743157);
     INSERT INTO CLIENT(clientId, nif) VALUES (3, 239735153);
-    COMMIT;
+
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (1, 'Carrot Field', 1);
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (2, 'Carrot Field', 2);
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (3, 'Carrot Field', 3);
@@ -104,7 +112,6 @@ BEGIN
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (10, 'Asparagus Field', 1);
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (11, 'Asparagus Field', 2);
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (12, 'Asparagus Field', 3);
-    COMMIT;
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (13, 'Apple Orchard', 1);
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (14, 'Apple Orchard', 2);
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (15, 'Apple Orchard', 3);
@@ -117,21 +124,28 @@ BEGIN
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (22, 'Beehive', 1);
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (23, 'Beehive', 2);
     INSERT INTO SECTOR(sectorId, name, exploration) VALUES (24, 'Beehive', 3);
-    COMMIT;
-    FOR clientCounter IN 1..3
+
+    INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H1', 'Client');
+    INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H2', 'Enterprise');
+    INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H3', 'Producer');
+    INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H4', 'Producer');
+
+    FOR hubCounter IN (SELECT hubId FROM HUB)
         LOOP
-            FOR timeCounter IN 1..72
+            FOR clientCounter IN 1..3
                 LOOP
-                    FOR productCounter IN 1..8
+                    FOR timeCounter IN 1..72
                         LOOP
-                            INSERT INTO SALE(saleId, timeId, clientId, productId, quantity)
-                            VALUES (saleCounter, timeCounter, clientCounter, productCounter,
-                                    ROUND(DBMS_RANDOM.VALUE(1, 100000)));
-                            saleCounter := saleCounter + 1;
+                            FOR productCounter IN 1..8
+                                LOOP
+                                    INSERT INTO SALE(saleId, timeId, clientId, productId, quantity,hub)
+                                    VALUES (saleCounter, timeCounter, clientCounter, productCounter,
+                                            ROUND(DBMS_RANDOM.VALUE(1, 100000)),hubCounter);
+                                    saleCounter := saleCounter + 1;
+                                end loop;
                         end loop;
                 end loop;
-        end loop;
-    COMMIT;
+        end LOOP;
     FOR sectorCounter IN 1..24
         LOOP
             FOR timeCounter IN 1..72
