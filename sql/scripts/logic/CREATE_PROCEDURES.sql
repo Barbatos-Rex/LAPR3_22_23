@@ -135,7 +135,8 @@ BEGIN
 
 end;
 
-CREATE OR REPLACE PROCEDURE prcUS212TransferInputsToSensorReadings(userCallerID IN SYSTEMUSER.ID%type, numberValid OUT NUMBER,
+CREATE OR REPLACE PROCEDURE prcUS212TransferInputsToSensorReadings(userCallerID IN SYSTEMUSER.ID%type,
+                                                                   numberValid OUT NUMBER,
                                                                    numberInvalid OUT NUMBER) AS
     numValid    NUMBER(20, 0) := 0;
     numInvalid  NUMBER(20, 0) := 0;
@@ -179,3 +180,35 @@ CREATE OR REPLACE PROCEDURE prcUS213LOG(callerId IN SYSTEMUSER.ID%type, logType 
 BEGIN
     INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND) VALUES (sysdate, callerId, logType, logCommand);
 end;
+
+CREATE OR REPLACE PROCEDURE prcUS215UpdateHub AS
+    cur     SYS_REFCURSOR;
+    str     VARCHAR2(25);
+    code    VARCHAR(5);
+    lat_    VARCHAR2(10);
+    lon_    VARCHAR2(10);
+    cliCode VARCHAR2(5);
+BEGIN
+    OPEN cur FOR SELECT input_string FROM INPUT_HUB;
+    LOOP
+        FETCH CUR INTO str;
+        EXIT WHEN cur%NOTFOUND;
+        FETCH regexp_substr(str, '[^;]+') into code,lat_,lon_,clicode;
+        INSERT INTO HUB(ID, LAT, LON, CLIENT) VALUES (code, lat_, lon_, cliCode)
+    end loop;
+end;
+
+CREATE OR REPLACE PROCEDURE prcUS215AlterDefaultClientHub(callerId SYSTEMUSER.ID%type, alterUserId SYSTEMUSER.ID%type,
+                                                          hubId HUB.ID%type) AS
+BEGIN
+    UPDATE CLIENT SET hub=hubId WHERE ID = alterUserId;
+    prcUS213LOG(callerId, 'UPDATE', 'UPDATE CLIENT SET hub=' || hubId || 'WHERE ID=' || alterUserId);
+end;
+
+CREATE OR REPLACE PROCEDURE prcUS215AlterBasketOrderHub(callerId SYSTEMUSER.ID%type,
+                                                        basketOrderId BASKETORDER.ORDERNUMBER%type,
+                                                        hubId Hub.ID%TYPE) AS
+BEGIN
+    UPDATE BASKETORDER SET hub=hubId WHERE ORDERNUMBER = basketOrderId;
+    prcUS213LOG(callerId, 'UPDATE', 'UPDATE BASKETORDER SET hub=' || hubId || 'WHERE ORDERNUMBER=' || basketOrderId);
+END;

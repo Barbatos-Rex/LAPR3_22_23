@@ -37,6 +37,7 @@ CREATE TABLE BasketOrder
     address      number(10) NOT NULL,
     orderNumber  number(10) GENERATED ALWAYS AS IDENTITY,
     payed        VARCHAR2(1)   DEFAULT 'N',
+    hub          VARCHAR2(5),
     PRIMARY KEY (client,
                  basket, orderDate)
 );
@@ -68,6 +69,7 @@ CREATE TABLE Client
     addressOfDelivery number(10)                   NOT NULL,
     priorityLevel     varchar2(1)   DEFAULT 'B'    NOT NULL CHECK ( REGEXP_LIKE(priorityLevel, '[ABC]') ),
     lastYearIncidents number(10)    DEFAULT 0      NOT NULL CHECK ( lastYearIncidents >= 0 ),
+    hub               VARCHAR2(5),
     PRIMARY KEY (id)
 );
 CREATE TABLE CropWatering
@@ -142,7 +144,12 @@ CREATE TABLE Harvest
 );
 CREATE TABLE Hub
 (
-    address number(10) NOT NULL
+    address number(10) ,
+    id      VARCHAR2(5)  NOT NULL,
+    lat     VARCHAR2(10) NOT NULL,
+    lon     VARCHAR(10)  NOT NULL,
+    client  varchar2(5)  NOT NULL,
+    PRIMARY KEY (id)
 );
 CREATE TABLE MachineryGarage
 (
@@ -277,6 +284,12 @@ CREATE TABLE input_sensor
     input_string VARCHAR2(25) NOT NULL,
     PRIMARY KEY (id)
 );
+CREATE TABLE input_hub
+(
+    id           NUMBER(10, 0) GENERATED ALWAYS AS IDENTITY,
+    input_string VARCHAR2(25) NOT NULL,
+    PRIMARY KEY (id)
+);
 
 -- Alter --
 
@@ -370,3 +383,7 @@ ALTER TABLE ProductionFactorsRecording
     ADD CONSTRAINT FKProductionFactorsRecordingOperationId FOREIGN KEY (operation) REFERENCES OPERATION (id);
 ALTER TABLE CropWatering
     ADD CONSTRAINT FKCropWateringOperationId FOREIGN KEY (operation) REFERENCES OPERATION (id);
+ALTER TABLE Client
+    ADD CONSTRAINT FKClientHub FOREIGN KEY (hub) REFERENCES Hub (id);
+ALTER TABLE BasketOrder
+    ADD CONSTRAINT FKBasketOrderHub FOREIGN KEY (hub) REFERENCES Hub (id);
