@@ -194,7 +194,7 @@ BEGIN
         FETCH CUR INTO str;
         EXIT WHEN cur%NOTFOUND;
         FETCH regexp_substr(str, '[^;]+') into code,lat_,lon_,clicode;
-        INSERT INTO HUB(ID, LAT, LON, CLIENT) VALUES (code, lat_, lon_, cliCode)
+        INSERT INTO HUB(ID, LAT, LON, CLIENT) VALUES (code, lat_, lon_, cliCode);
     end loop;
 end;
 
