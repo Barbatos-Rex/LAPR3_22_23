@@ -182,19 +182,19 @@ BEGIN
 end;
 
 CREATE OR REPLACE PROCEDURE prcUS215UpdateHub AS
-    cur     SYS_REFCURSOR;
-    str     VARCHAR2(25);
-    code    VARCHAR(5);
-    lat_    VARCHAR2(10);
-    lon_    VARCHAR2(10);
-    cliCode VARCHAR2(5);
+    cur         SYS_REFCURSOR;
+    str         VARCHAR2(25);
+    code        VARCHAR(5);
+    lat_        VARCHAR2(10);
+    lon_        VARCHAR2(10);
+    cliCode     VARCHAR2(5);
+    spliterator Sys_Refcursor;
 BEGIN
     OPEN cur FOR SELECT input_string FROM INPUT_HUB;
     LOOP
         FETCH CUR INTO str;
         EXIT WHEN cur%NOTFOUND;
-        FETCH regexp_substr(str, '[^;]+') into code,lat_,lon_,clicode;
-        INSERT INTO HUB(ID, LAT, LON, CLIENT) VALUES (code, lat_, lon_, cliCode);
+        INSERT INTO HUB(ID, LAT, LON, CLIENT) VALUES (regexp_substr(str, '[^;]+',1,1), regexp_substr(str, '[^;]+',1,2),regexp_substr(str, '[^;]+',1,3), regexp_substr(str, '[^;]+',1,4));
     end loop;
 end;
 

@@ -74,8 +74,10 @@ DECLARE
 --     yearCounter  NUMBER(4, 0);
 --     monthCounter NUMBER(2, 0);
     timeC             NUMBER(8, 0)  := 1;
-    saleCounter       NUMBER(10, 0) := 1;
+    saleCounter       NUMBER(10, 0) := 0;
     productionCounter NUMBER(10, 0) := 0;
+    hubCursor         Sys_Refcursor;
+    hubId             HUB.HUBID%type;
 
 BEGIN
     FOR yearCounter IN 2016..2021
@@ -86,7 +88,7 @@ BEGIN
                     timeC := timeC + 1;
                 end loop;
         end loop;
-    COMMIT;
+
     INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (1, 'Permanent', 'Apple');
     INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (2, 'Permanent', 'Pear');
     INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (3, 'Permanent', 'Banana');
@@ -130,22 +132,24 @@ BEGIN
     INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H3', 'Producer');
     INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H4', 'Producer');
 
-    FOR hubCounter IN (SELECT hubId FROM HUB)
-        LOOP
-            FOR clientCounter IN 1..3
-                LOOP
-                    FOR timeCounter IN 1..72
-                        LOOP
-                            FOR productCounter IN 1..8
-                                LOOP
-                                    INSERT INTO SALE(saleId, timeId, clientId, productId, quantity,hub)
-                                    VALUES (saleCounter, timeCounter, clientCounter, productCounter,
-                                            ROUND(DBMS_RANDOM.VALUE(1, 100000)),hubCounter);
-                                    saleCounter := saleCounter + 1;
-                                end loop;
-                        end loop;
-                end loop;
-        end LOOP;
+
+    OPEN hubCursor FOR SELECT HUBID FROM HUB;
+    LOOP
+        FETCH hubCursor into hubId;
+        FOR clientCounter IN 1..3
+            LOOP
+                FOR timeCounter IN 1..72
+                    LOOP
+                        FOR productCounter IN 1..8
+                            LOOP
+                                INSERT INTO SALE(saleId, timeId, clientId, productId, quantity, hub)
+                                VALUES (saleCounter, timeCounter, clientCounter, productCounter,
+                                        ROUND(DBMS_RANDOM.VALUE(1, 100000)), hubId);
+                                saleCounter := saleCounter + 1;
+                            end loop;
+                    end loop;
+            end loop;
+    end LOOP;
     FOR sectorCounter IN 1..24
         LOOP
             FOR timeCounter IN 1..72
