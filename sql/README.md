@@ -1552,11 +1552,29 @@ end;
 DROP PROCEDURE prcUS209OrderBasket;
 ```
 
-### US210
+
 
 ### US212
 
 #### prcUS212TransferInputsToSensorReadings
+
+This procedure reads the values registered by the sensors available in the input_sensor table, verifies if they are valid and, if they are valid, stores them in the sensor readings table.
+
+Parameters:
+userCallerID – The ID of the user executing the procedure
+numberValid – The number of valid readings read from the input_sensor table
+numberInvalid – The number of invalid readings read from the input_sensor table
+
+Execution Flow:
+1. Open a cursor to read the data from the input_sensor table
+2. Loop through the cursor to read each row
+3. Call FNCUS212ISVALIDREADING function to validate each reading
+4. If the reading is valid:
+a. Insert the sensor into the SENSOR table if it does not already exist
+b. Insert the reading into the SENSORREADING table
+c. Delete the corresponding row from the input_sensor table
+5. Increment the number of valid or invalid readings depending
+
 ```sql
 CREATE OR REPLACE PROCEDURE prcUS212TransferInputsToSensorReadings(userCallerID IN SYSTEMUSER.ID%type,
                                                                    numberValid OUT NUMBER,
@@ -1607,7 +1625,12 @@ DROP PROCEDURE prcUS212TransferInputsToSensorReadings;
 
 #### prcUS213LOG
 
+This procedure was created to provide access to audit trails of planned or performed agricultural operations in a specific sector of the agricultural exploitation. It logs changes made to the database, storing the user/login who made the change, the date and time the change was made, and the type of change (INSERT, UPDATE, DELETE).
 
+Parameters:
+callerId – The ID of the user making the change
+logType – The type of change (INSERT, UPDATE, DELETE)
+logCommand – The command that was executed
 
 ```sql
 CREATE OR REPLACE PROCEDURE prcUS213LOG(callerId IN SYSTEMUSER.ID%type, logType IN AUDITLOG.TYPE%type,
@@ -1627,9 +1650,22 @@ DROP PROCEDURE prcUS213LOG;
 
 #### prcUS215UpdateHub
 
-```sql
-DROP PROCEDURE prcUS215UpdateHub;
-```
+The list of hubs is updated as needed via the input_hub table (input_string VARCHAR (25)) where records with this information are entered, in csv format, by an external information system component to the management module of the exploitation.
+
+Parameters:
+cur – A cursor to read the data from the input_hub table
+str – A string containing the input data
+code – The ID of the hub
+lat_ – The latitude of the hub
+lon_ – The longitude of the hub
+cliCode – The ID of the client associated with the hub
+spliterator – A cursor to iterate through the input data
+
+Execution Flow:
+1. Open a cursor to read the data from the input_hub table
+2. Loop through the cursor to read each row
+3. Parse the data into variables
+4. Insert the data into the Hub table
 
 ```sql
 CREATE OR REPLACE PROCEDURE prcUS215UpdateHub AS
@@ -1649,7 +1685,25 @@ BEGIN
     end loop;
 end;
 ```
+
+```sql
+    DROP PROCEDURE prcUS215UpdateHub;
+```
 #### prcUS215AlterDefaultClientHub
+
+This procedure is used to change the default hub of a customer. 
+
+Parameters:
+- callerId: ID of the user executing the procedure
+- alterUserId: ID of the user to be altered
+- hubId: ID of the hub to be used as the default hub
+
+Process:
+1. The procedure receives its three parameters.
+2. Updates the CLIENT table record with the new default hub.
+3. Executes the change logging procedure prcUS213LOG to log the change.
+
+
 
 ```sql
 CREATE OR REPLACE PROCEDURE prcUS215AlterDefaultClientHub(callerId SYSTEMUSER.ID%type, alterUserId SYSTEMUSER.ID%type,
@@ -1666,6 +1720,19 @@ DROP PROCEDURE prcUS215AlterDefaultClientHub;
 
 
 #### prcUS215AlterBasketOrderHub
+
+This procedure is used to change the hub of a basket order. 
+
+Parameters:
+- callerId: ID of the user executing the procedure
+- basketOrderId: ID of the basket order to be altered
+- hubId: ID of the hub to be used as the hub for the basket order
+
+Process:
+1. The procedure receives its three parameters.
+2. Updates the BASKETORDER table record with the new hub.
+3. Executes the change logging procedure prcUS213LOG to log the change.
+
 
 ```sql
 CREATE OR REPLACE PROCEDURE prcUS215AlterBasketOrderHub(callerId SYSTEMUSER.ID%type,
@@ -2253,13 +2320,50 @@ DROP FUNCTION fncUS209ListOrdersByPrice;
 
 ### US210
 
+### fncUS210GetOperationType
 
-### US211
+This function is used to retrieve the type of an operation. 
+
+Parameters:
+- operationId: ID of the operation to be retrieved
+
+Return Value:
+- A string indicating the type of the operation, either 'Production Factor' or 'Crop Watering'.
+
+Process:
+1. The function receives the operationId parameter.
+2. The number of records in the PRODUCTIONFACTORSRECORDING table with the given operationId is retrieved.
+3. If the number of records is greater than 0, the type of the operation is 'Production Factor'. Otherwise, it is 'Crop Watering'.
+
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS210GetOperationType(operationId OPERATION.ID%type) RETURN VARCHAR2 AS
+    counter INTEGER := 0;
+BEGIN
+    SELECT count(*) INTO counter FROM PRODUCTIONFACTORSRECORDING WHERE OPERATION = operationId;
+    if (counter > 0) THEN
+        return 'Production Factor';
+    else
+        return 'Crop Watering';
+    end if;
+
+end;
+```
+
+```sql
+DROP FUNCTION fncUS210GetOperationType;
+```
 
 
 ### US212
 
 #### fncUS212GetTheNthSensorReading
+
+This is a SQL function named fncUS212GetTheNthSensorReading which takes an entryNumber of type NUMBER(20, 0) as a parameter and returns a value of type VARCHAR2(25). It is used to retrieve data from the input_sensor table.
+
+The function first checks that the entryNumber is not greater than the total number of entries in the table, and raises an error if it is. It then opens a cursor, loops through the entries in the table, and sets the result to the entry corresponding to the entryNumber. Finally, the result is returned.
+
+
 
 
 ```sql
@@ -2295,6 +2399,21 @@ DROP FUNCTION fncUS212GetTheNthSensorReading;
 ```
 
 #### fncUS212IsValidReading
+
+This is a SQL function named fncUS212IsValidReading which takes a string representing a reading from a sensor as a parameter and returns a boolean value indicating whether the reading is valid or not. It also has five OUT parameters which are used to store the values of the reading.
+
+The function first checks that all parts of the reading are present, and returns false if any of them are missing. It then checks that the sensor type is valid, and returns false if it is not. It also checks that the value is between 0 and 100, and returns false if it is not. Finally, it uses the OUT parameters to store the id, sensor type, value, unique number, and date of the reading, and returns true if all of these checks pass.
+
+Parameters:
+
+reading (VARCHAR): A string representing a reading from a sensor.
+
+id (VARCHAR2): An OUT parameter used to store the 5-character string identifier for the sensor.
+
+sensorType (VARCHAR2): An OUT parameter used to store the two-character string type of sensor.
+
+value (NUMBER): An OUT parameter used to store the integer value between 0 and 100 for the sensor.
+
 
 ```sql
 CREATE OR REPLACE FUNCTION fncUS212IsValidReading(reading IN varchar,
@@ -2410,6 +2529,8 @@ DROP TRIGGER trgFindFieldRecording;
 
 ### trgRegisterOperation
 
+This trigger is used to register a new operation when a new record is inserted into the ProductionFactorsRecording table. 
+
 ```sql
 CREATE OR REPLACE TRIGGER trgRegisterOperation
     BEFORE INSERT
@@ -2427,6 +2548,8 @@ DROP TRIGGER trgRegisterOperation;
 
 
 ### trgRegisterOperation
+
+This trigger is used to register a new operation when a new record is inserted into the CropWatering table. 
 
 ```sql
 CREATE OR REPLACE TRIGGER trgRegisterOperation
@@ -2446,6 +2569,8 @@ DROP TRIGGER trgRegisterOperation;
 
 
 ### trgAlterProductionFactorsRecording
+
+This trigger is used to ensure that only pending operations can be altered. 
 
 ```sql
 CREATE OR REPLACE TRIGGER trgAlterProductionFactorsRecording
@@ -2469,6 +2594,8 @@ DROP TRIGGER trgAlterProductionFactorsRecording;
 
 
 ### trgCropWatering
+
+This trigger is used to ensure that only pending operations can be altered. 
 
 ```sql
 CREATE OR REPLACE TRIGGER trgCropWatering
@@ -2530,6 +2657,8 @@ DROP VIEW CLIENTVIEW;
 
 ### AuditSimpleScan
 
+This view is used to list the user ID, user email, date of action and type of actions performed in the system order by date.
+
 ```sql
 CREATE OR REPLACE VIEW AuditSimpleScan AS
 SELECT USERID       as "User Id",
@@ -2548,6 +2677,8 @@ DROP VIEW AuditSimpleScan;
 
 ### AuditCompleteScan
 
+This view is used to list the user ID, user email, date of action, type of actions and command performed in the system order by date.
+
 ```sql
 CREATE OR REPLACE VIEW AuditCompleteScan AS
 SELECT USERID       as "User Id",
@@ -2564,7 +2695,23 @@ ORDER BY "Date of Action";
 ```sql
 DROP VIEW AuditCompleteScan;
 ```
-
+### OperationCalendar 
+This view is used to list the operations scheduled in the system, ordered by date.
+```sql
+CREATE OR REPLACE VIEW OperationCalendar AS
+SELECT O.ID                           as OPERATION_ID,
+       O.STATUS                       as OPERATION_STATUS,
+       O.MARKEDDATE                   as OPERATION_DATE,
+       fncUS210GetOperationType(O.ID) as OPERATION_TYPE,
+       SECTOR
+FROM OPERATION O
+         JOIN CROPWATERING CW ON O.ID=CW.OPERATION
+         JOIN ProductionFactorsRecording PF ON O.ID=PF.OPERATION
+ORDER BY OPERATION_DATE DESC;
+```
+```sql
+DROP VIEW OperationCalendar ;
+```
 # Models
 
 ## STAR
