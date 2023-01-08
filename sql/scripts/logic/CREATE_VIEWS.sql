@@ -34,3 +34,24 @@ SELECT USERID       as "User Id",
 FROM AUDITLOG
          JOIN SYSTEMUSER S on AUDITLOG.USERID = S.ID
 ORDER BY "Date of Action";
+
+
+
+
+--NOTE:
+--      The Sector part of this View may not work because ProductionFactorsRecording does not have sector. However,
+--      if ProductionFactorsRecording had a sector, another problem would arise, the conflict
+--      between ProductionFactorsRecording and CropWatering sectors, because the way the join was design.
+--
+--      To mitigate such problem, there are two options: Either restrain the "JOIN" clauses with "RIGHT JOIN" assuring that
+--      there is no conflicts or using the "COALESCE" function to make sure that there are no null sectors
+CREATE OR REPLACE VIEW OperationCalendar AS
+SELECT O.ID                           as OPERATION_ID,
+       O.STATUS                       as OPERATION_STATUS,
+       O.MARKEDDATE                   as OPERATION_DATE,
+       fncUS210GetOperationType(O.ID) as OPERATION_TYPE,
+       SECTOR
+FROM OPERATION O
+         JOIN CROPWATERING CW ON O.ID=CW.OPERATION
+         JOIN ProductionFactorsRecording PF ON O.ID=PF.OPERATION
+ORDER BY OPERATION_DATE DESC;

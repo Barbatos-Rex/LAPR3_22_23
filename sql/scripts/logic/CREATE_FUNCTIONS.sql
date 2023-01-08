@@ -305,6 +305,21 @@ BEGIN
     return result;
 end;
 
+
+CREATE OR REPLACE FUNCTION fncUS210GetOperationType(operationId OPERATION.ID%type) RETURN VARCHAR2 AS
+    counter INTEGER := 0;
+BEGIN
+    SELECT count(*) INTO counter FROM PRODUCTIONFACTORSRECORDING WHERE OPERATION = operationId;
+    if (counter > 0) THEN
+        return 'Production Factor';
+    else
+        return 'Crop Watering';
+    end if;
+
+end;
+
+
+
 CREATE OR REPLACE FUNCTION fncUS212GetTheNthSensorReading(entryNumber IN NUMBER(21, 0)) RETURN VARCHAR2(25) AS
     result   VARCHAR2(25);
     tmp      VARCHAR2(25);
