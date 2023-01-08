@@ -8,6 +8,7 @@ that are scattered along this project. This project will have into account the f
 3. [Scripts](#scripts)
 4. [Database Physical Structure](#database-physical-structure)
 5. [Database Logic](#database-logic)
+6. [Models](#models)
 
 
 # Database Naming Conventions
@@ -1494,8 +1495,9 @@ end;
 ```sql
 DROP PROCEDURE prcUS208AddEntryToProductionFactor;
 ```
+### US209
 
-### prcUS209OrderBasket
+#### prcUS209OrderBasket
 
 This procedure will order a certain amount of a basket to an user; it will receive the id of the client, the id of the
 basket,
@@ -1549,6 +1551,137 @@ end;
 ```sql
 DROP PROCEDURE prcUS209OrderBasket;
 ```
+
+### US210
+
+### US212
+
+#### prcUS212TransferInputsToSensorReadings
+```sql
+CREATE OR REPLACE PROCEDURE prcUS212TransferInputsToSensorReadings(userCallerID IN SYSTEMUSER.ID%type,
+                                                                   numberValid OUT NUMBER,
+                                                                   numberInvalid OUT NUMBER) AS
+    numValid    NUMBER(20, 0) := 0;
+    numInvalid  NUMBER(20, 0) := 0;
+    CUR         SYS_REFCURSOR;
+    reading     VARCHAR2(25);
+    rid         input_sensor.ID%type;
+    idSen       VARCHAR2(5);
+    senType     VARCHAR2(2);
+    value       NUMBER(3);
+    uniqueNum   NUMBER(2);
+    readingDate date;
+    counter     NUMBER(10, 0) := 0;
+
+BEGIN
+    open CUR for SELECT * FROM input_sensor;
+    LOOP
+        FETCH CUR into rid,reading;
+        EXIT WHEN CUR%NOTFOUND;
+        if (FNCUS212ISVALIDREADING(reading, idSen, senType, value, uniqueNum, readingDate)) then
+            numValid := numValid + 1;
+            SELECT count(*) into counter FROM SENSOR WHERE SENSOR.ID = idSen;
+            if (counter = 0) THEN
+                INSERT INTO SENSOR(id, sensortype, uniquenumber) VALUES (idSen, senType, uniqueNum);
+                prcUS213LOG(userCallerID, 'INSERT', 'INSERT INTO SENSOR(id, sensortype, uniquenumber) VALUES (' ||
+                                                    idSen || ',' || senType || ',' || uniqueNum || ')');
+            end if;
+            INSERT INTO SENSORREADING(DATEOFREADING, SENSOR, READING) VALUES (readingDate, idSen, value);
+            prcUS213LOG(userCallerID, 'INSERT', ' INSERT INTO SENSORREADING(DATEOFREADING, SENSOR, READING) VALUES (' ||
+                                                readingDate || ',' || idSen || ',' || value || ')');
+            DELETE INPUT_SENSOR WHERE ID = rid;
+        else
+            numInvalid := numInvalid + 1;
+        end if;
+    end LOOP;
+    numberValid := numValid;
+    numberInvalid := numInvalid;
+end;
+```
+
+```sql
+DROP PROCEDURE prcUS212TransferInputsToSensorReadings;
+```
+
+### US213
+
+#### prcUS213LOG
+
+
+
+```sql
+CREATE OR REPLACE PROCEDURE prcUS213LOG(callerId IN SYSTEMUSER.ID%type, logType IN AUDITLOG.TYPE%type,
+                                        logCommand IN AUDITLOG.COMMAND%type) AS
+BEGIN
+    INSERT INTO AUDITLOG(DATEOFACTION, USERID, TYPE, COMMAND) VALUES (sysdate, callerId, logType, logCommand);
+end;
+```
+
+
+```sql
+DROP PROCEDURE prcUS213LOG;
+```
+
+### US215
+
+
+#### prcUS215UpdateHub
+
+```sql
+DROP PROCEDURE prcUS215UpdateHub;
+```
+
+```sql
+CREATE OR REPLACE PROCEDURE prcUS215UpdateHub AS
+    cur         SYS_REFCURSOR;
+    str         VARCHAR2(25);
+    code        VARCHAR(5);
+    lat_        VARCHAR2(10);
+    lon_        VARCHAR2(10);
+    cliCode     VARCHAR2(5);
+    spliterator Sys_Refcursor;
+BEGIN
+    OPEN cur FOR SELECT input_string FROM INPUT_HUB;
+    LOOP
+        FETCH CUR INTO str;
+        EXIT WHEN cur%NOTFOUND;
+        INSERT INTO HUB(ID, LAT, LON, CLIENT) VALUES (regexp_substr(str, '[^;]+',1,1), regexp_substr(str, '[^;]+',1,2),regexp_substr(str, '[^;]+',1,3), regexp_substr(str, '[^;]+',1,4));
+    end loop;
+end;
+```
+#### prcUS215AlterDefaultClientHub
+
+```sql
+CREATE OR REPLACE PROCEDURE prcUS215AlterDefaultClientHub(callerId SYSTEMUSER.ID%type, alterUserId SYSTEMUSER.ID%type,
+                                                          hubId HUB.ID%type) AS
+BEGIN
+    UPDATE CLIENT SET hub=hubId WHERE ID = alterUserId;
+    prcUS213LOG(callerId, 'UPDATE', 'UPDATE CLIENT SET hub=' || hubId || 'WHERE ID=' || alterUserId);
+end;
+```
+
+```sql
+DROP PROCEDURE prcUS215AlterDefaultClientHub;
+```
+
+
+#### prcUS215AlterBasketOrderHub
+
+```sql
+CREATE OR REPLACE PROCEDURE prcUS215AlterBasketOrderHub(callerId SYSTEMUSER.ID%type,
+                                                        basketOrderId BASKETORDER.ORDERNUMBER%type,
+                                                        hubId Hub.ID%TYPE) AS
+BEGIN
+    UPDATE BASKETORDER SET hub=hubId WHERE ORDERNUMBER = basketOrderId;
+    prcUS213LOG(callerId, 'UPDATE', 'UPDATE BASKETORDER SET hub=' || hubId || 'WHERE ORDERNUMBER=' || basketOrderId);
+END;
+```
+
+```sql
+DROP PROCEDURE prcUS215AlterBasketOrderHub;
+```
+
+
 
 ## Functions
 
@@ -2117,6 +2250,103 @@ end;
 DROP FUNCTION fncUS209ListOrdersByPrice;
 ```
 
+
+### US210
+
+
+### US211
+
+
+### US212
+
+#### fncUS212GetTheNthSensorReading
+
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS212GetTheNthSensorReading(entryNumber IN NUMBER(20, 0)) RETURN VARCHAR2(25) AS
+    result   VARCHAR2(25);
+    tmp      VARCHAR2(25);
+    readings NUMBER(20, 0);
+    cur      SYS_REFCURSOR;
+    tmpC     NUMBER(20, 0);
+BEGIN
+    result := NULL;
+    SELECT count(*) into readings FROM input_sensor;
+    if (entryNumber > readings) THEN
+        RAISE_APPLICATION_ERROR(-20005, 'There is no entry for the ' || entryNumber || ' position! There are only ' ||
+                                        readings || ' entries!');
+    end if;
+    OPEN cur FOR SELECT * from input_sensor;
+    LOOP
+        FETCH cur INTO tmp;
+        EXIT WHEN cur%notfound;
+        if (tmpC = entryNumber) THEN
+            result := tmp;
+        end if;
+        tmpc := tmpC + 1;
+    end loop;
+    close cur;
+    return result;
+end;
+```
+
+```sql
+DROP FUNCTION fncUS212GetTheNthSensorReading;
+```
+
+#### fncUS212IsValidReading
+
+```sql
+CREATE OR REPLACE FUNCTION fncUS212IsValidReading(reading IN varchar,
+                                                  id OUT VARCHAR2,
+                                                  sensorType OUT VARCHAR2,
+                                                  value OUT NUMBER,
+                                                  uniqueNum OUT NUMBER,
+                                                  readingDate OUT date) RETURN boolean AS
+
+    iden       VARCHAR2(5);
+    senType    VARCHAR2(2);
+    val        VARCHAR2(3);
+    idNum      VARCHAR2(2);
+    charDate   VARCHAR2(13);
+    flag       BOOLEAN      := TRUE;
+    dateformat varchar2(15) := 'DDMMYYYYHH:MI';
+
+BEGIN
+
+    iden := SUBSTR(reading, 0, 5);
+    senType := SUBSTR(reading, 6, 2);
+    val := SUBSTR(reading, 8, 3);
+    idNum := SUBSTR(reading, 11, 2);
+    charDate := SUBSTR(reading, 13);
+
+    if (iden is null OR senType is null OR val is null OR idNum is null OR charDate is null) then
+        flag := FALSE;
+    end if;
+    id := iden;
+    if (NOT (senType = 'HS' OR senType = 'PL' OR senType = 'TS' OR senType = 'VV' OR senType = 'TA'
+        OR senType = 'HA' OR senType = 'PA')) THEN
+        flag := false;
+    end if;
+    sensorType := senType;
+    if (TO_NUMBER(val, '999') > 100 OR TO_NUMBER(val, '999') < 0) THEN
+        flag := false;
+    end if;
+    value := TO_NUMBER(val, '999');
+    uniqueNum := TO_NUMBER(idNum, '99');
+    readingDate := TO_DATE(charDate, dateformat);
+    return flag;
+EXCEPTION
+    WHEN OTHERS THEN
+        return false;
+end;
+```
+
+
+```sql
+DROP FUNCTION fncUS212IsValidReading;
+```
+
 ## Triggers
 
 ### trgCreateMeteorologicStation
@@ -2177,6 +2407,91 @@ end;
 DROP TRIGGER trgFindFieldRecording;
 ```
 
+
+### trgRegisterOperation
+
+```sql
+CREATE OR REPLACE TRIGGER trgRegisterOperation
+    BEFORE INSERT
+    ON ProductionFactorsRecording
+    FOR EACH ROW
+    WHEN ( new.operation IS NULL )
+BEGIN
+    INSERT INTO OPERATION(STATUS) VALUES ('PENDING') RETURNING ID INTO :new.OPERATION;
+end;
+```
+
+```sql
+DROP TRIGGER trgRegisterOperation;
+```
+
+
+### trgRegisterOperation
+
+```sql
+CREATE OR REPLACE TRIGGER trgRegisterOperation
+    BEFORE INSERT
+    ON CropWatering
+    FOR EACH ROW
+    WHEN ( new.operation IS NULL )
+BEGIN
+    INSERT INTO OPERATION(STATUS) VALUES ('PENDING') RETURNING ID INTO :new.OPERATION;
+end;
+```
+
+
+```sql
+DROP TRIGGER trgRegisterOperation;
+```
+
+
+### trgAlterProductionFactorsRecording
+
+```sql
+CREATE OR REPLACE TRIGGER trgAlterProductionFactorsRecording
+    BEFORE UPDATE
+    ON ProductionFactorsRecording
+    FOR EACH ROW
+DECLARE
+    stat OPERATION.STATUS%TYPE;
+BEGIN
+    SELECT STATUS into stat FROM OPERATION WHERE ID = :new.operation;
+    if (stat <> 'PENDING') THEN
+        RAISE_APPLICATION_ERROR(-20007, 'Cannot alter a non pending operation!');
+    end if;
+end;
+```
+
+
+```sql
+DROP TRIGGER trgAlterProductionFactorsRecording;
+```
+
+
+### trgCropWatering
+
+```sql
+CREATE OR REPLACE TRIGGER trgCropWatering
+    BEFORE UPDATE
+    ON CropWatering
+    FOR EACH ROW
+DECLARE
+    stat OPERATION.STATUS%TYPE;
+BEGIN
+    SELECT STATUS into stat FROM OPERATION WHERE ID = :new.operation;
+    if (stat <> 'PENDING') THEN
+        RAISE_APPLICATION_ERROR(-20007, 'Cannot alter a non pending operation!');
+    end if;
+end;
+```
+
+
+```sql
+DROP TRIGGER trgCropWatering;
+```
+
+
+
 ## Views
 
 ### ClientView
@@ -2210,4 +2525,314 @@ FROM CLIENT CParent;
 
 ```sql
 DROP VIEW CLIENTVIEW;
+```
+
+
+### AuditSimpleScan
+
+```sql
+CREATE OR REPLACE VIEW AuditSimpleScan AS
+SELECT USERID       as "User Id",
+       EMAIL        as "User Email",
+       DATEOFACTION as "Date of Action",
+       TYPE         as "Action Type"
+FROM AUDITLOG
+         JOIN SYSTEMUSER S on AUDITLOG.USERID = S.ID
+ORDER BY "Date of Action";
+```
+
+```sql
+DROP VIEW AuditSimpleScan;
+```
+
+
+### AuditCompleteScan
+
+```sql
+CREATE OR REPLACE VIEW AuditCompleteScan AS
+SELECT USERID       as "User Id",
+       EMAIL        as "User Email",
+       DATEOFACTION as "Date of Action",
+       TYPE         as "Action Type",
+       COMMAND      as "Command Performed"
+FROM AUDITLOG
+         JOIN SYSTEMUSER S on AUDITLOG.USERID = S.ID
+ORDER BY "Date of Action";
+```
+
+
+```sql
+DROP VIEW AuditCompleteScan;
+```
+
+# Models
+
+## STAR
+
+### Create STAR
+
+```sql
+--STAR MODEL--
+CREATE TABLE CLIENT
+(
+    clientId number(10, 0) NOT NULL,
+    nif      number(9, 0)  NOT NULL CHECK ( REGEXP_LIKE(nif, '^[1-4]\d{8}') ),
+    PRIMARY KEY (clientId)
+);
+CREATE TABLE PRODUCT
+(
+    productId NUMBER(10, 0) NOT NULL,
+    type      VARCHAR2(255) NOT NULL,
+    name      VARCHAR2(255) NOT NULL,
+    PRIMARY KEY (productId)
+);
+CREATE TABLE PRODUCTION
+(
+    productionId NUMBER(10, 0) NOT NULL,
+    timeId       NUMBER(10, 0) NOT NULL,
+    sectorId     NUMBER(10, 0) NOT NULL,
+    productId    NUMBER(10, 0) NOT NULL,
+    amount       NUMBER(10, 0) NOT NULL,
+    PRIMARY KEY (productionId)
+);
+CREATE TABLE SALE
+(
+    saleId    NUMBER(10, 0) NOT NULL,
+    timeId    NUMBER(10, 0) NOT NULL,
+    clientId  NUMBER(10, 0) NOT NULL,
+    productId NUMBER(10, 0) NOT NULL,
+    quantity  NUMBER(10, 0) NOT NULL,
+    hub       VARCHAR2(5)   NOT NULL,
+    PRIMARY KEY (saleId)
+);
+CREATE TABLE SECTOR
+(
+    sectorId    NUMBER(10, 0) NOT NULL,
+    name        VARCHAR2(255) NOT NULL,
+    exploration VARCHAR2(255) NOT NULL,
+    PRIMARY KEY (sectorId)
+);
+CREATE TABLE TIME
+(
+    timeId NUMBER(10, 0) NOT NULL PRIMARY KEY,
+    year   NUMBER(4, 0)  NOT NULL,
+    month  NUMBER(2, 0)  NOT NULL CHECK ( month BETWEEN 1 AND 12)
+);
+CREATE TABLE HUB
+(
+    hubId   VARCHAR2(5)   NOT NULL PRIMARY KEY,
+    hubType VARCHAR2(255) NOT NULL
+);
+
+
+ALTER TABLE PRODUCTION
+    ADD CONSTRAINT FKProductionSectorId FOREIGN KEY (sectorId) REFERENCES SECTOR (sectorId);
+ALTER TABLE PRODUCTION
+    ADD CONSTRAINT FKProductionProductId FOREIGN KEY (productId) REFERENCES PRODUCT (productId);
+ALTER TABLE PRODUCTION
+    ADD CONSTRAINT FKProductionTimeId FOREIGN KEY (timeId) REFERENCES TIME (timeId);
+
+
+ALTER TABLE SALE
+    ADD CONSTRAINT FKSaleClientId FOREIGN KEY (clientId) REFERENCES CLIENT (clientId);
+ALTER TABLE SALE
+    ADD CONSTRAINT FKSaleProductId FOREIGN KEY (productId) REFERENCES PRODUCT (productId);
+ALTER TABLE SALE
+    ADD CONSTRAINT FKSaleTimeId FOREIGN KEY (timeId) REFERENCES TIME (timeId);
+ALTER TABLE SALE
+    ADD CONSTRAINT FKSaleHubId FOREIGN KEY (hub) references HUB (hubId);
+
+
+--OPTIONAL BOOT--
+DECLARE
+--     yearCounter  NUMBER(4, 0);
+--     monthCounter NUMBER(2, 0);
+    timeC             NUMBER(8, 0)  := 1;
+    saleCounter       NUMBER(10, 0) := 0;
+    productionCounter NUMBER(10, 0) := 0;
+    hubCursor         Sys_Refcursor;
+    hubId             HUB.HUBID%type;
+
+BEGIN
+    FOR yearCounter IN 2016..2021
+        LOOP
+            FOR monthCounter IN 1..12
+                LOOP
+                    INSERT INTO TIME(TIMEID, YEAR, MONTH) VALUES (timeC, yearCounter, monthCounter);
+                    timeC := timeC + 1;
+                end loop;
+        end loop;
+
+    INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (1, 'Permanent', 'Apple');
+    INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (2, 'Permanent', 'Pear');
+    INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (3, 'Permanent', 'Banana');
+    INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (4, 'Permanent', 'Honey');
+    INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (5, 'Temporary', 'Carrot');
+    INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (6, 'Temporary', 'Potato');
+    INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (7, 'Temporary', 'Strawberry');
+    INSERT INTO PRODUCT(PRODUCTID, TYPE, NAME) VALUES (8, 'Temporary', 'Asparagus');
+
+    INSERT INTO CLIENT(clientId, nif) VALUES (1, 239745158);
+    INSERT INTO CLIENT(clientId, nif) VALUES (2, 219743157);
+    INSERT INTO CLIENT(clientId, nif) VALUES (3, 239735153);
+
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (1, 'Carrot Field', 1);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (2, 'Carrot Field', 2);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (3, 'Carrot Field', 3);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (4, 'Potato Field', 1);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (5, 'Potato Field', 2);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (6, 'Potato Field', 3);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (7, 'Strawberry Field', 1);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (8, 'Strawberry Field', 2);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (9, 'Strawberry Field', 3);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (10, 'Asparagus Field', 1);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (11, 'Asparagus Field', 2);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (12, 'Asparagus Field', 3);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (13, 'Apple Orchard', 1);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (14, 'Apple Orchard', 2);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (15, 'Apple Orchard', 3);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (16, 'Pear Orchard', 1);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (17, 'Pear Orchard', 2);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (18, 'Pear Orchard', 3);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (19, 'Banana Orchard', 1);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (20, 'Banana Orchard', 2);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (21, 'Banana Orchard', 3);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (22, 'Beehive', 1);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (23, 'Beehive', 2);
+    INSERT INTO SECTOR(sectorId, name, exploration) VALUES (24, 'Beehive', 3);
+
+    INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H1', 'Client');
+    INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H2', 'Enterprise');
+    INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H3', 'Producer');
+    INSERT INTO HUB(HUBID, HUBTYPE) VALUES ('H4', 'Producer');
+
+
+    OPEN hubCursor FOR SELECT HUBID FROM HUB;
+    LOOP
+        FETCH hubCursor into hubId;
+        FOR clientCounter IN 1..3
+            LOOP
+                FOR timeCounter IN 1..72
+                    LOOP
+                        FOR productCounter IN 1..8
+                            LOOP
+                                INSERT INTO SALE(saleId, timeId, clientId, productId, quantity, hub)
+                                VALUES (saleCounter, timeCounter, clientCounter, productCounter,
+                                        ROUND(DBMS_RANDOM.VALUE(1, 100000)), hubId);
+                                saleCounter := saleCounter + 1;
+                            end loop;
+                    end loop;
+            end loop;
+    end LOOP;
+    FOR sectorCounter IN 1..24
+        LOOP
+            FOR timeCounter IN 1..72
+                LOOP
+                    FOR productCounter IN 1..8
+                        LOOP
+                            productionCounter := productionCounter + 1;
+                            INSERT INTO PRODUCTION(productionId, timeId, sectorId, productId, amount)
+                            VALUES (productionCounter, timeCounter, sectorCounter, productCounter,
+                                    ROUND(DBMS_RANDOM.VALUE(1, 100000)));
+                            COMMIT;
+                        end loop;
+                end loop;
+        end loop;
+end;
+```
+
+### Routines
+
+```sql
+CREATE OR REPLACE FUNCTION getEvolutionOfProductionIn(sector IN PRODUCTION.SECTORID%type, prod IN PRODUCT.NAME%type,
+                                                      y IN TIME.YEAR%type, m IN TIME.MONTH%type) RETURN NUMBER AS
+    amountCurrent NUMBER(10, 0);
+    amountPast    NUMBER(10, 0);
+    tmpM          NUMBER(2, 0);
+    tmpY          NUMBER(4, 0);
+begin
+    SELECT AMOUNT
+    into amountCurrent
+    FROM PRODUCTION
+             JOIN PRODUCT P on P.PRODUCTID = PRODUCTION.PRODUCTID
+             JOIN TIME T on T.TIMEID = PRODUCTION.TIMEID
+    WHERE SECTORID = sector
+      AND P.NAME = prod
+      AND T.YEAR = y
+      AND T.MONTH = m;
+    tmpY := y;
+    tmpM := m - 1;
+    if (tmpM <= 0) THEN
+        tmpM := 12;
+        tmpY := tmpY - 1;
+    end if;
+    SELECT AMOUNT
+    into amountPast
+    FROM PRODUCTION
+             JOIN PRODUCT P on P.PRODUCTID = PRODUCTION.PRODUCTID
+             JOIN TIME T on T.TIMEID = PRODUCTION.TIMEID
+    WHERE SECTORID = sector
+      AND P.NAME = prod
+      AND T.YEAR = tmpY
+      AND T.MONTH = tmpM;
+    return amountCurrent - amountPast;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        return NULL;
+end;
+```
+### Views
+
+```sql
+CREATE OR REPLACE VIEW LastFiveYearsEvolution AS
+SELECT P.PRODUCTIONID,
+       T.YEAR,
+       T.MONTH,
+       SECTORID,
+       P2.NAME,
+       AMOUNT,
+       COALESCE(TO_CHAR(getEvolutionOfProductionIn(SECTORID, P2.NAME, T.YEAR, T.MONTH)),
+                'Not possible to make a comparison with last month!') as EVOLUTION
+FROM PRODUCTION P
+         JOIN TIME T on T.TIMEID = P.TIMEID
+         JOIN PRODUCT P2 on P2.PRODUCTID = P.PRODUCTID
+WHERE T.YEAR >= TO_NUMBER(TO_CHAR(SYSDATE, 'YYYY'), '9999') - 5;
+
+CREATE OR REPLACE VIEW CompareSales AS
+SELECT T1.MONTH,
+       P.NAME                    as PRODUCT_NAME,
+       T1.YEAR                   as FIRST_YEAR,
+       S1.QUANTITY               as FIRST_YEAR_SALES,
+       T2.YEAR                   as SECOND_YEAR,
+       S2.QUANTITY               as SECOND_YEAR_SALES,
+       S1.QUANTITY - S2.QUANTITY as YEARS_COMPARISON
+FROM SALE S1
+         JOIN TIME T1 on S1.TIMEID = T1.TIMEID
+         JOIN PRODUCT P on P.PRODUCTID = S1.PRODUCTID,
+     SALE S2
+         JOIN TIME T2 on T2.TIMEID = S2.TIMEID
+WHERE T1.MONTH = T2.MONTH
+  AND S1.PRODUCTID = S2.PRODUCTID
+  AND S1.CLIENTID = S2.CLIENTID;
+
+CREATE OR REPLACE VIEW MensalEvolutionOfCultureTypes AS
+SELECT DISTINCT T.YEAR,
+                T.MONTH,
+                TYPE,
+                sum(QUANTITY) as Quantity,
+                COALESCE(TO_CHAR(sum(QUANTITY) - (SELECT DISTINCT SUM(QUANTITY)
+                                 FROM PRODUCT Child
+                                          JOIN SALE S3 on Child.PRODUCTID = S3.PRODUCTID
+                                          JOIN TIME T2 on T2.TIMEID = S3.TIMEID
+                                 WHERE Child.TYPE = Parent.TYPE
+                                   AND T2.TIMEID = (SELECT TIMEID
+                                                    FROM TIME T3
+                                                    WHERE (T3.MONTH = T.MONTH - 1 AND T3.YEAR = T.YEAR)
+                                                       OR (T3.YEAR = T.YEAR - 1 AND T3.MONTH = 12)
+                                                    ORDER BY YEAR DESC, MONTH FETCH FIRST ROW ONLY))),'There are no values to compare!') as COMPARISON
+FROM PRODUCT Parent
+         JOIN SALE S2 on Parent.PRODUCTID = S2.PRODUCTID
+         JOIN TIME T on T.TIMEID = S2.TIMEID
+GROUP BY T.YEAR, T.MONTH, TYPE
+ORDER BY T.YEAR, T.MONTH;
 ```
