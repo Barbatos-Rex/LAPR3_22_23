@@ -60,19 +60,19 @@ CREATE TABLE YEAR
 (
     year NUMBER(4) NOT NULL PRIMARY KEY
 );
-CREATE TABLE HUB
-(
-    hubId   VARCHAR2(5)  NOT NULL PRIMARY KEY,
-    hubType VARCHAR2(10) NOT NULL
-);
-CREATE TABLE HubType
-(
-    hubType VARCHAR2(10) NOT NULL PRIMARY KEY
-);
+-- CREATE TABLE HUB
+-- (
+--     hubId   VARCHAR2(5)  NOT NULL PRIMARY KEY,
+--     hubType VARCHAR2(10) NOT NULL
+-- );
+-- CREATE TABLE HubType
+-- (
+--     hubType VARCHAR2(10) NOT NULL PRIMARY KEY
+-- );
 
 
-ALTER TABLE HUB
-    ADD CONSTRAINT FKHubHubType FOREIGN KEY (hubType) REFERENCES HubType (hubType);
+-- ALTER TABLE HUB
+--     ADD CONSTRAINT FKHubHubType FOREIGN KEY (hubType) REFERENCES HubType (hubType);
 
 
 ALTER TABLE PRODUCT
@@ -100,8 +100,8 @@ ALTER TABLE TIME
 ALTER TABLE TIME
     ADD CONSTRAINT FKTimeYearId FOREIGN KEY (year) REFERENCES YEAR (year);
 
-ALTER TABLE SALE
-    ADD CONSTRAINT FKSaleHub FOREIGN KEY (hub) REFERENCES HUB (hubId);
+-- ALTER TABLE SALE
+--     ADD CONSTRAINT FKSaleHub FOREIGN KEY (hub) REFERENCES HUB (hubId);
 
 --OPTIONAL BOOT--
 DECLARE
@@ -216,39 +216,37 @@ VALUES (23, 'Beehive', 2);
 INSERT INTO SECTOR(sectorId, name, exploration)
 VALUES (24, 'Beehive', 3);
 
-INSERT INTO HubType(hubType)
-VALUES ('Client');
-INSERT INTO HubType(hubType)
-VALUES ('Enterprise');
-INSERT INTO HubType(hubType)
-VALUES ('Producer');
+-- INSERT INTO HubType(hubType)
+-- VALUES ('Client');
+-- INSERT INTO HubType(hubType)
+-- VALUES ('Enterprise');
+-- INSERT INTO HubType(hubType)
+-- VALUES ('Producer');
 
-INSERT INTO HUB(hubId, hubType)
-VALUES ('H1', 'Client');
-INSERT INTO HUB(hubId, hubType)
-VALUES ('H2', 'Enterprise');
-INSERT INTO HUB(hubId, hubType)
-VALUES ('H3', 'Producer');
-INSERT INTO HUB(hubId, hubType)
-VALUES ('H4', 'Producer');
+-- INSERT INTO HUB(hubId, hubType)
+-- VALUES ('H1', 'Client');
+-- INSERT INTO HUB(hubId, hubType)
+-- VALUES ('H2', 'Enterprise');
+-- INSERT INTO HUB(hubId, hubType)
+-- VALUES ('H3', 'Producer');
+-- INSERT INTO HUB(hubId, hubType)
+-- VALUES ('H4', 'Producer');
 
 DECLARE
     saleCounter       NUMBER(10, 0) := 1;
     productionCounter NUMBER(10, 0) := 0;
 BEGIN
-    FOR hubCounter IN (SELECT hubId FROM HUB)
+
+    FOR clientCounter IN 1..3
         LOOP
-            FOR clientCounter IN 1..3
+            FOR timeCounter IN 1..72
                 LOOP
-                    FOR timeCounter IN 1..72
+                    FOR productCounter IN 1..8
                         LOOP
-                            FOR productCounter IN 1..8
-                                LOOP
-                                    INSERT INTO SALE(saleId, timeId, clientId, productId, quantity, hub)
-                                    VALUES (saleCounter, timeCounter, clientCounter, productCounter,
-                                            ROUND(DBMS_RANDOM.VALUE(1, 100000)), hubCounter);
-                                    saleCounter := saleCounter + 1;
-                                end loop;
+                            INSERT INTO SALE(saleId, timeId, clientId, productId, quantity, hub)
+                            VALUES (saleCounter, timeCounter, clientCounter, productCounter,
+                                    ROUND(DBMS_RANDOM.VALUE(1, 100000)), hubCounter);
+                            saleCounter := saleCounter + 1;
                         end loop;
                 end loop;
         end loop;

@@ -305,7 +305,7 @@ BEGIN
     return result;
 end;
 
-CREATE OR REPLACE FUNCTION fncUS212GetTheNthSensorReading(entryNumber IN NUMBER(20, 0)) RETURN VARCHAR2(25) AS
+CREATE OR REPLACE FUNCTION fncUS212GetTheNthSensorReading(entryNumber IN NUMBER(21, 0)) RETURN VARCHAR2(25) AS
     result   VARCHAR2(25);
     tmp      VARCHAR2(25);
     readings NUMBER(20, 0);
